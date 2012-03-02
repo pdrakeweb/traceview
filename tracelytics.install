@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * @file tracelytics module install file
+ */
+
+/**
+ * Implements hook_requirements().
+ *
+ * Indicate whether the oboe php extension requirement is met.
+ */
+function tracelytics_requirements($phase) {
+  $requirements = array();
+
+  if ($phase == 'runtime') {
+    if (!function_exists('oboe_log')) {
+      $requirements['tracelytics'] = array(
+        'value' => t('Not installed'),
+        'severity' => REQUIREMENT_ERROR,
+        'description' => t('tracelytics module requires the oboe php extension to be installed.'),
+      );
+    }
+    else {
+      $requirements['tracelytics'] = array(
+        'value' => t('Installed'),
+        'severity' => REQUIREMENT_OK,
+      );
+    }
+    $requirements['tracelytics']['title'] = t('Oboe PHP Extension (tracelytics)');
+  }
+
+  return $requirements;
+}

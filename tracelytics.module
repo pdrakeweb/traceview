@@ -1,0 +1,89 @@
+<?php
+
+/**
+ * @file Module file for tracelytics module
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function tracelytics_menu() {
+  $items['admin/settings/tracelytics'] = array(
+    'title' => 'Tracelytics',
+    'description' => 'Configure the settings used for tracelytics (oboe).',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tracelytics_admin_settings'),
+    'access arguments' => array('administer tracelytics'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_perm().
+ */
+function tracelytics_perm() {
+  return array('administer tracelytics');
+}
+
+/**
+ * Implements hook_admin_settings().
+ *
+ * Provide administrative options to enable/disable tracelytics functionality.
+ */
+function tracelytics_admin_settings() {
+  $form = array();
+  $form['tracelytics_partition_traffic'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Partition traffic'),
+    '#description' => t('Enables partitioning of traffic into drush, cron, anonymous and authenticated.'),
+    '#default_value' => variable_get('tracelytics_partition_traffic', FALSE),
+  );
+  $form['tracelytics_track_menu'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Track active menu items'),
+    '#description' => t('Enables tracking of the active menu item in a custom variable menu_custom.'),
+    '#default_value' => variable_get('tracelytics_track_menu', FALSE),
+  );
+  return system_settings_form($form);
+}
+
+/**
+ * Implements hook_exit().
+ *
+ * Utilize oboe_log for traffic partitioning.
+ */
+function tracelytics_exit() {
+  // Partition traffic into authenticated and unauthenticated
+  if (variable_get('tracelytics_partition_traffic', FALSE)) {
+    global $user;
+    if (function_exists('oboe_log')) {
+      if ($_SERVER['SCRIPT_FILENAME'] == 'drush') {
+        oboe_log('info', array('Partition' => 'Drush'));
+      }
+      elseif ($_SERVER['SCRIPT_FILENAME'] == 'cron.php') {
+        oboe_log('info', array('Partition' => 'Cron'));
+      }
+      elseif (isset($user->uid)) {
+        switch($user->uid) {
+          case 1:
+            oboe_log('info', array('Partition' => 'Admin'));
+            break;
+          case 0:
+            oboe_log('info', array('Partition' => 'Anonymous'));
+            break;
+          default:
+            oboe_log('info', array('Partition' => 'Authenticated'));
+          break;
+        }
+      }
+    }
+  }
+
+  // Track active menu item
+  if (variable_get('tracelytics_track_menu', FALSE)) {
+    if ($router_item = menu_get_item()) {
+      oboe_log('menu_item', array("Controller" => ((isset($router_item['file'])) ? $router_item['file'] : 'drupal'), "Action" => $router_item['page_callback']));
+    }
+  }
+}
