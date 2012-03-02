@@ -32,18 +32,23 @@ function tracelytics_perm() {
  * Provide administrative options to enable/disable tracelytics functionality.
  */
 function tracelytics_admin_settings() {
+  if (!(function_exists('oboe_log'))) {
+    drupal_set_message(t('Required Oboe PHP extension is not installed.'), 'error');
+  }
   $form = array();
   $form['tracelytics_partition_traffic'] = array(
     '#type' => 'checkbox',
     '#title' => t('Partition traffic'),
-    '#description' => t('Enables partitioning of traffic into drush, cron, anonymous and authenticated.'),
+    '#description' => t('Enable partitioning of traffic into drush, cron, anonymous and authenticated.'),
     '#default_value' => variable_get('tracelytics_partition_traffic', FALSE),
+    '#disabled' => !(function_exists('oboe_log')),
   );
   $form['tracelytics_track_menu'] = array(
     '#type' => 'checkbox',
     '#title' => t('Track active menu items'),
-    '#description' => t('Enables tracking of the active menu item in a custom variable menu_custom.'),
+    '#description' => t('Enable tracking of the active menu item in a custom variable menu_custom.'),
     '#default_value' => variable_get('tracelytics_track_menu', FALSE),
+    '#disabled' => !(function_exists('oboe_log')),
   );
   return system_settings_form($form);
 }
@@ -54,10 +59,11 @@ function tracelytics_admin_settings() {
  * Utilize oboe_log for traffic partitioning.
  */
 function tracelytics_exit() {
-  // Partition traffic into authenticated and unauthenticated
-  if (variable_get('tracelytics_partition_traffic', FALSE)) {
-    global $user;
-    if (function_exists('oboe_log')) {
+
+  if (function_exists('oboe_log')) {
+    // Partition traffic into authenticated and unauthenticated
+    if (variable_get('tracelytics_partition_traffic', FALSE)) {
+      global $user;
       if ($_SERVER['SCRIPT_FILENAME'] == 'drush') {
         oboe_log('info', array('Partition' => 'Drush'));
       }
@@ -78,12 +84,12 @@ function tracelytics_exit() {
         }
       }
     }
-  }
 
-  // Track active menu item
-  if (variable_get('tracelytics_track_menu', FALSE)) {
-    if ($router_item = menu_get_item()) {
-      oboe_log('menu_item', array("Controller" => ((isset($router_item['file'])) ? $router_item['file'] : 'drupal'), "Action" => $router_item['page_callback']));
+    // Track active menu item
+    if (variable_get('tracelytics_track_menu', FALSE)) {
+      if ($router_item = menu_get_item()) {
+        oboe_log('menu_item', array("Controller" => ((isset($router_item['file'])) ? $router_item['file'] : 'drupal'), "Action" => $router_item['page_callback']));
+      }
     }
   }
 }
