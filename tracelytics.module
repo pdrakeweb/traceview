@@ -79,27 +79,30 @@ function tracelytics_watchdog($log_entry) {
  * Utilize oboe_log for traffic partitioning.
  */
 function tracelytics_exit() {
-  // Partition traffic into authenticated and unauthenticated
+  global $user;
+
+  // Partition traffic
   if (variable_get('tracelytics_partition_traffic', FALSE)) {
-    global $user;
-    if ($_SERVER['SCRIPT_FILENAME'] == 'drush') {
-      oboe_log('info', array('Partition' => 'Drush'));
-    }
-    elseif ($_SERVER['SCRIPT_FILENAME'] == 'cron.php') {
-      oboe_log('info', array('Partition' => 'Cron'));
-    }
-    elseif (isset($user->uid)) {
-      switch($user->uid) {
-        case 1:
-          oboe_log('info', array('Partition' => 'Admin'));
-          break;
-        case 0:
-          oboe_log('info', array('Partition' => 'Anonymous'));
-          break;
-        default:
-          oboe_log('info', array('Partition' => 'Authenticated'));
-          break;
-      }
+    switch(tracelytics_get_script()) {
+      case 'cron.php':
+        oboe_log('info', array('Partition' => 'Cron'));
+        break;
+      case 'update.php':
+        oboe_log('info', array('Partition' => 'Update'));
+        break;
+      case 'index.php':
+        switch($user->uid) {
+          case 1:
+            oboe_log('info', array('Partition' => 'Admin'));
+            break;
+          case 0:
+            oboe_log('info', array('Partition' => 'Anonymous'));
+            break;
+          default:
+            oboe_log('info', array('Partition' => 'Authenticated'));
+            break;
+        }
+        break;
     }
   }
 
@@ -108,8 +111,45 @@ function tracelytics_exit() {
     oboe_log('info',
       array(
         'Controller' => $router_item['page_callback'],
-        'Action' => (!empty($router_item['page_arguments'][0]) ? $router_item['page_arguments'][0] : NULL),
+        'Action' => tracelytics_get_action($router_item['page_arguments'][0]),
       )
     );
   }
+}
+
+/**
+ * Get an action string from an unknown argument type.
+ *
+ * @param unknown_type $argument
+ */
+function tracelytics_get_action($argument) {
+  if (is_string($argument)) {
+    $action = $argument;
+  }
+  elseif (is_array($argument)) {
+    $action = 'array';
+  }
+  elseif (is_object($argument)) {
+    if (!empty($argument->nid)) {
+      $action = (!empty($argument->type) ? $argument->type . '_' : '') . 'node';
+    }
+    elseif (!empty($argument->uid)) {
+      $action = 'user';
+    }
+    else {
+      $action = get_class($argument);
+    }
+  }
+  else {
+    $action = NULL;
+  }
+  return $action;
+}
+
+/**
+ * Determines the filename of the currently executing script.
+ */
+function tracelytics_get_script() {
+  $script_name = array_pop(explode('/', $_SERVER['SCRIPT_NAME']));
+  return $script_name;
 }
