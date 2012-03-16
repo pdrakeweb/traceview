@@ -123,25 +123,37 @@ function tracelytics_exit() {
  * @param unknown_type $argument
  */
 function tracelytics_get_action($argument) {
-  if (is_string($argument)) {
-    $action = $argument;
-  }
-  elseif (is_array($argument)) {
-    $action = 'array';
-  }
-  elseif (is_object($argument)) {
-    if (!empty($argument->nid)) {
-      $action = (!empty($argument->type) ? $argument->type . '_' : '') . 'node';
-    }
-    elseif (!empty($argument->uid)) {
-      $action = 'user';
-    }
-    else {
-      $action = get_class($argument);
-    }
-  }
-  else {
-    $action = NULL;
+  switch(gettype($argument)) {
+    case 'integer':
+    case 'double':
+    case 'boolean':
+    case 'string':
+      $action = (string) $argument;
+      break;
+
+    case 'array':
+      $action = 'array';
+      break;
+
+    case 'object':
+      if (!empty($argument->nid)) {
+        $action = (!empty($argument->type) ? $argument->type . '_' : '') . 'node';
+      }
+      elseif (!empty($argument->uid)) {
+        $action = 'user';
+      }
+      else {
+        $action = get_class($argument);
+      }
+      break;
+
+    case 'resource':
+      $action = get_resource_type($argument);
+      break;
+
+    default:
+      $action = NULL;
+      break;
   }
   return $action;
 }
