@@ -108,11 +108,10 @@ function tracelytics_exit() {
 
   // Track active menu item
   if (variable_get('tracelytics_track_menu', FALSE) && $router_item = menu_get_item()) {
-    $argument = (!empty($router_item['page_arguments'][0]) ? $router_item['page_arguments'][0] : NULL);
     oboe_log('info',
       array(
         'Controller' => $router_item['page_callback'],
-        'Action' => tracelytics_get_action($argument),
+        'Action' => (isset($router_item['page_arguments'][0]) ? tracelytics_get_action($router_item['page_arguments'][0]) : 'NULL'),
       )
     );
   }
