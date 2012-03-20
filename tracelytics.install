@@ -13,22 +13,41 @@
 function tracelytics_requirements($phase) {
   $requirements = array();
 
-  if ($phase == 'runtime') {
-    if (!function_exists('oboe_log')) {
-      $requirements['tracelytics'] = array(
-        'value' => t('Not installed'),
-        'severity' => REQUIREMENT_ERROR,
-        'description' => t('tracelytics module requires the oboe php extension to be installed.'),
-      );
-    }
-    else {
-      $requirements['tracelytics'] = array(
-        'value' => t('Installed'),
-        'severity' => REQUIREMENT_OK,
-      );
-    }
-    $requirements['tracelytics']['title'] = t('Oboe PHP Extension (tracelytics)');
+  switch ($phase) {
+    case 'runtime':
+      if (!function_exists('oboe_log')) {
+        $requirements['tracelytics'] = array(
+          'value' => t('Not installed'),
+          'severity' => REQUIREMENT_ERROR,
+          'description' => t('tracelytics module requires the oboe php extension to be installed.'),
+        );
+      }
+      else {
+        $requirements['tracelytics'] = array(
+          'value' => t('Installed'),
+          'severity' => REQUIREMENT_OK,
+        );
+      }
+      $requirements['tracelytics']['title'] = t('Oboe PHP Extension (tracelytics)');
+      break;
+    case 'update':
+      // Partition traffic
+      if (variable_get('tracelytics_partition_traffic', FALSE)) {
+        oboe_log('info', array('Partition' => 'Update'));
+      }
+      
+      // Track active menu item
+      if (variable_get('tracelytics_track_menu', FALSE)) {
+        oboe_log('info',
+          array(
+            'Controller' => 'update',
+            'Action' => NULL,
+          )
+        );
+      }
+      break;
   }
 
   return $requirements;
 }
+
