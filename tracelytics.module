@@ -9,7 +9,7 @@
  * Implements hook_menu().
  */
 function tracelytics_menu() {
-  $items['admin/config/tracelytics'] = array(
+  $items['admin/config/system/tracelytics'] = array(
     'title' => 'Tracelytics',
     'description' => 'Configure the settings used for tracelytics (oboe).',
     'page callback' => 'drupal_get_form',
