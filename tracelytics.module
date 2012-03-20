@@ -175,12 +175,3 @@ function tracelytics_get_action($argument) {
   }
   return $action;
 }
-
-/**
- * Determines the filename of the currently executing script.
- */
-function tracelytics_get_script() {
-  $script_name = array_pop(explode('/', $_SERVER['SCRIPT_NAME']));
-  return $script_name;
-}
-
