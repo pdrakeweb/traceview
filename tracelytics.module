@@ -24,7 +24,12 @@ function tracelytics_menu() {
  * Implements hook_perm().
  */
 function tracelytics_permission() {
-  return array('administer tracelytics');
+  return array(
+    'administer tracelytics' => array(
+      'title' => t('Administer tracelytics'),
+      'description' => t('Configure settings for the tracelytics module.'),
+    )
+  );
 }
 
 /**
@@ -84,25 +89,15 @@ function tracelytics_exit() {
 
   // Partition traffic
   if (variable_get('tracelytics_partition_traffic', FALSE)) {
-    switch (tracelytics_get_script()) {
-      case 'cron.php':
-        oboe_log('info', array('Partition' => 'Cron'));
+    switch ($user->uid) {
+      case 1:
+        oboe_log('info', array('Partition' => 'Admin'));
         break;
-      case 'update.php':
-        oboe_log('info', array('Partition' => 'Update'));
+      case 0:
+        oboe_log('info', array('Partition' => 'Anonymous'));
         break;
-      case 'index.php':
-        switch ($user->uid) {
-          case 1:
-            oboe_log('info', array('Partition' => 'Admin'));
-            break;
-          case 0:
-            oboe_log('info', array('Partition' => 'Anonymous'));
-            break;
-          default:
-            oboe_log('info', array('Partition' => 'Authenticated'));
-            break;
-        }
+      default:
+        oboe_log('info', array('Partition' => 'Authenticated'));
         break;
     }
   }
@@ -113,6 +108,28 @@ function tracelytics_exit() {
       array(
         'Controller' => $router_item['page_callback'],
         'Action' => (isset($router_item['page_arguments'][0]) ? tracelytics_get_action($router_item['page_arguments'][0]) : 'NULL'),
+      )
+    );
+  }
+}
+
+/**
+ * Implements hook_cron().
+ *
+ * Utilize oboe_log for traffic partitioning.
+ */
+function tracelytics_cron() {
+  // Partition traffic
+  if (variable_get('tracelytics_partition_traffic', FALSE)) {
+    oboe_log('info', array('Partition' => 'Cron'));
+  }
+
+  // Track active menu item
+  if (variable_get('tracelytics_track_menu', FALSE)) {
+    oboe_log('info',
+      array(
+        'Controller' => 'cron',
+        'Action' => NULL,
       )
     );
   }
@@ -166,3 +183,4 @@ function tracelytics_get_script() {
   $script_name = array_pop(explode('/', $_SERVER['SCRIPT_NAME']));
   return $script_name;
 }
+
