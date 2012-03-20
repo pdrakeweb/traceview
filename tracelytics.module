@@ -70,7 +70,8 @@ function tracelytics_watchdog($log_entry) {
   if (variable_get('tracelytics_log_errors', FALSE)
       && $log_entry['severity'] <= WATCHDOG_WARNING
       && $log_entry['type'] != 'php') {
-    oboe_log('info', array('ErrorClass' => $log_entry['type'], 'ErrorMsg' => $log_entry['message']));
+    $message = filter_xss(is_null($log_entry['variables']) ? $log_entry['message'] : strtr($log_entry['message'], $log_entry['variables']));
+    oboe_log('info', array('ErrorClass' => $log_entry['type'], 'ErrorMsg' => $message));
   }
 }
 
