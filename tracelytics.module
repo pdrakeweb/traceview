@@ -83,7 +83,7 @@ function tracelytics_exit() {
 
   // Partition traffic
   if (variable_get('tracelytics_partition_traffic', FALSE)) {
-    switch(tracelytics_get_script()) {
+    switch (tracelytics_get_script()) {
       case 'cron.php':
         oboe_log('info', array('Partition' => 'Cron'));
         break;
@@ -91,7 +91,7 @@ function tracelytics_exit() {
         oboe_log('info', array('Partition' => 'Update'));
         break;
       case 'index.php':
-        switch($user->uid) {
+        switch ($user->uid) {
           case 1:
             oboe_log('info', array('Partition' => 'Admin'));
             break;
@@ -123,7 +123,7 @@ function tracelytics_exit() {
  * @param unknown_type $argument
  */
 function tracelytics_get_action($argument) {
-  switch(gettype($argument)) {
+  switch (gettype($argument)) {
     case 'integer':
     case 'double':
     case 'boolean':
