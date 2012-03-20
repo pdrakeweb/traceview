@@ -1,3 +1,3 @@
 name = tracelytics
 description = Provide integration between drupal and tracelytics web application monitoring.
-core = 6.x
+core = 7.x
