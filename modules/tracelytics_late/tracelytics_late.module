@@ -6,18 +6,6 @@
  */
 
 /**
- * Implements hook_views_post_render().
- * @param unknown_type $view
- * @param unknown_type $output
- * @param unknown_type $cache
- */
-function tracelytics_late_views_post_render(&$view, &$output, &$cache) {
-  if (variable_get('tracelytics_layers', FALSE)) {
-    oboe_log('drupal_views', 'exit', array());
-  }
-}
-
-/**
  * Implements hook_boot().
  */
 function tracelytics_late_boot() {
@@ -36,6 +24,44 @@ function tracelytics_late_init() {
 }
 
 /**
+ * Implements hook_form_alter().
+ *
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ * @param unknown_type $form_id
+ */
+function tracelytics_late_form_alter(&$form, &$form_state, $form_id) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_form_alter', 'exit', array());
+  }
+}
+
+/**
+ * Implements hook_views_post_render().
+ *
+ * @param unknown_type $view
+ * @param unknown_type $output
+ * @param unknown_type $cache
+ */
+function tracelytics_late_views_post_render(&$view, &$output, &$cache) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_views', 'exit', array());
+  }
+}
+
+/**
+ * Implements hook_node_load().
+ *
+ * @param unknown_type $nodes
+ * @param unknown_type $types
+ */
+function tracelytics_late_node_load($nodes, $types) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_node_load', 'exit', array());
+  }
+}
+
+/**
  * Implements hook_watchdog().
  */
 function tracelytics_late_watchdog($log_entry) {
@@ -50,17 +76,5 @@ function tracelytics_late_watchdog($log_entry) {
 function tracelytics_late_exit() {
   if (variable_get('tracelytics_layers', FALSE)) {
     oboe_log('drupal_hook_exit', 'exit', array());
-  }
-}
-
-/**
- * Implements hook_node_load().
- *
- * @param unknown_type $nodes
- * @param unknown_type $types
- */
-function tracelytics_late_node_load($nodes, $types) {
-  if (variable_get('tracelytics_layers', FALSE)) {
-    oboe_log('drupal_hook_node_load', 'exit', array());
   }
 }
