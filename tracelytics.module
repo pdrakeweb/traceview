@@ -33,6 +33,48 @@ function tracelytics_permission() {
 }
 
 /**
+ * Implements hook_views_pre_view().
+ * @param unknown_type $view
+ * @param unknown_type $display_id
+ * @param unknown_type $args
+ */
+function tracelytics_views_pre_view(&$view, &$display_id, &$args) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_views', 'entry', array());
+  }
+}
+
+/**
+ * Implements hook_views_post_render().
+ * @param unknown_type $view
+ * @param unknown_type $output
+ * @param unknown_type $cache
+ */
+function tracelytics_views_post_render(&$view, &$output, &$cache) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_views', 'exit', array());
+  }
+}
+
+/**
+ * Implements hook_boot().
+ */
+function tracelytics_boot() {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_boot', 'entry', array());
+  }
+}
+
+/**
+ * Implements hook_init().
+ */
+function tracelytics_init() {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_init', 'entry', array());
+  }
+}
+
+/**
  * Implements hook_admin_settings().
  *
  * Provide administrative options to enable/disable tracelytics functionality.
@@ -63,6 +105,13 @@ function tracelytics_admin_settings() {
       '#default_value' => variable_get('tracelytics_log_errors', FALSE),
       '#disabled' => !(function_exists('oboe_log')),
   );
+  $form['tracelytics_layers'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Track layers'),
+      '#description' => t('Enable tracking of Drupal layers via hooks.'),
+      '#default_value' => variable_get('tracelytics_layers', FALSE),
+      '#disabled' => !(function_exists('oboe_log')),
+  );
   return system_settings_form($form);
 }
 
@@ -72,6 +121,9 @@ function tracelytics_admin_settings() {
  * Record errors to tracelytics.
  */
 function tracelytics_watchdog($log_entry) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_watchdog', 'entry', array());
+  }
   if (variable_get('tracelytics_log_errors', FALSE)
       && $log_entry['severity'] <= WATCHDOG_WARNING
       && $log_entry['type'] != 'php') {
@@ -87,6 +139,11 @@ function tracelytics_watchdog($log_entry) {
  */
 function tracelytics_exit() {
   global $user;
+
+  // Track layers
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_exit', 'entry', array());
+  }
 
   // Partition traffic
   if (variable_get('tracelytics_partition_traffic', FALSE)) {
