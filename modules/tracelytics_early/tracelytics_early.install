@@ -10,7 +10,7 @@
  */
 function tracelytics_early_install() {
   db_update('system')
-    ->fields(array('weight' => 10000))
+    ->fields(array('weight' => -10000))
     ->condition('name', 'tracelytics_early', '=')
     ->execute();
 }
