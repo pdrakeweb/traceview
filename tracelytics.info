@@ -1,3 +1,4 @@
 name = tracelytics
 description = Provide integration between drupal and tracelytics web application monitoring.
 core = 7.x
+configure = admin/config/system/tracelytics
