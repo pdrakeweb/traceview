@@ -50,3 +50,18 @@ function tracelytics_requirements($phase) {
 
   return $requirements;
 }
+
+/**
+ * Implements hook_uninstall().
+ */
+function tracelytics_uninstall() {
+  $tracelytics_vars = array(
+    'tracelytics_partition_traffic',
+    'tracelytics_track_menu',
+    'tracelytics_log_errors',
+    'tracelytics_layers',
+  );
+  foreach($tracelytics_vars as $var) {
+    variable_del($var);
+  }
+}

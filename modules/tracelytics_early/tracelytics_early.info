@@ -1,0 +1,4 @@
+name = tracelytics_early
+description = Provide early hooks for registering layers in tracelytics.
+core = 7.x
+dependencies[] = tracelytics

@@ -1,0 +1,66 @@
+<?php
+
+/**
+ * @file
+ * Module file for tracelytics_late module
+ */
+
+/**
+ * Implements hook_views_post_render().
+ * @param unknown_type $view
+ * @param unknown_type $output
+ * @param unknown_type $cache
+ */
+function tracelytics_late_views_post_render(&$view, &$output, &$cache) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_views', 'exit', array());
+  }
+}
+
+/**
+ * Implements hook_boot().
+ */
+function tracelytics_late_boot() {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_boot', 'exit', array());
+  }
+}
+
+/**
+ * Implements hook_init().
+ */
+function tracelytics_late_init() {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_init', 'exit', array());
+  }
+}
+
+/**
+ * Implements hook_watchdog().
+ */
+function tracelytics_late_watchdog($log_entry) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_watchdog', 'exit', array());
+  }
+}
+
+/**
+ * Implements hook_exit().
+ */
+function tracelytics_late_exit() {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_exit', 'exit', array());
+  }
+}
+
+/**
+ * Implements hook_node_load().
+ *
+ * @param unknown_type $nodes
+ * @param unknown_type $types
+ */
+function tracelytics_late_node_load($nodes, $types) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_node_load', 'exit', array());
+  }
+}
