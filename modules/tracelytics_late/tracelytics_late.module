@@ -26,9 +26,9 @@ function tracelytics_late_init() {
 /**
  * Implements hook_form_alter().
  *
- * @param unknown_type $form
- * @param unknown_type $form_state
- * @param unknown_type $form_id
+ * @param array $form
+ * @param array $form_state
+ * @param string $form_id
  */
 function tracelytics_late_form_alter(&$form, &$form_state, $form_id) {
   if (variable_get('tracelytics_layers', FALSE)) {
@@ -39,9 +39,9 @@ function tracelytics_late_form_alter(&$form, &$form_state, $form_id) {
 /**
  * Implements hook_views_post_render().
  *
- * @param unknown_type $view
- * @param unknown_type $output
- * @param unknown_type $cache
+ * @param object $view
+ * @param string $output
+ * @param object $cache
  */
 function tracelytics_late_views_post_render(&$view, &$output, &$cache) {
   if (variable_get('tracelytics_layers', FALSE)) {
@@ -52,8 +52,8 @@ function tracelytics_late_views_post_render(&$view, &$output, &$cache) {
 /**
  * Implements hook_node_load().
  *
- * @param unknown_type $nodes
- * @param unknown_type $types
+ * @param object $nodes
+ * @param array $types
  */
 function tracelytics_late_node_load($nodes, $types) {
   if (variable_get('tracelytics_layers', FALSE)) {
@@ -63,6 +63,8 @@ function tracelytics_late_node_load($nodes, $types) {
 
 /**
  * Implements hook_watchdog().
+ *
+ * @param array $log_entry
  */
 function tracelytics_late_watchdog($log_entry) {
   if (variable_get('tracelytics_layers', FALSE)) {
