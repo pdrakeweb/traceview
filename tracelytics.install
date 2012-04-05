@@ -5,6 +5,19 @@
  * tracelytics module install file
  */
 
+
+/**
+ * Implements hook_install().
+ */
+function tracelytics_install() {
+  // @todo remove this and reset module weight to 0 after tracelytics fixes
+  // the bug.
+  // Tracelytics needs to run its hook_X calls immediately before
+  // tracelytics_early so that 'info' layer calls are not wrapped in
+  // custom drupal_X layers to work around a bug in tracelytics oboe_log.
+  db_query('UPDATE {system} SET weight = -10001 WHERE name = "tracelytics"');
+}
+
 /**
  * Implements hook_requirements().
  *
@@ -30,13 +43,14 @@ function tracelytics_requirements($phase) {
       }
       $requirements['tracelytics']['title'] = t('Oboe PHP Extension (tracelytics)');
       break;
+
     case 'update':
-      // Partition traffic
+      // Partition update traffic.
       if (variable_get('tracelytics_partition_traffic', FALSE)) {
         oboe_log('info', array('Partition' => 'Update'));
       }
-      
-      // Track active menu item
+
+      // Track active menu item.
       if (variable_get('tracelytics_track_menu', FALSE)) {
         oboe_log('info',
           array(
@@ -51,3 +65,19 @@ function tracelytics_requirements($phase) {
   return $requirements;
 }
 
+/**
+ * Implements hook_uninstall().
+ */
+function tracelytics_uninstall() {
+  $tracelytics_vars = array(
+    'tracelytics_partition_traffic',
+    'tracelytics_track_menu',
+    'tracelytics_log_errors',
+    'tracelytics_layers',
+    'tracelytics_partition_drush_traffic',
+    'tracelytics_track_drush_commands',
+  );
+  foreach ($tracelytics_vars as $var) {
+    variable_del($var);
+  }
+}

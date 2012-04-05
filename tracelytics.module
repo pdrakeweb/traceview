@@ -36,6 +36,15 @@ function tracelytics_admin_settings() {
   if (!(function_exists('oboe_log'))) {
     drupal_set_message(t('Required Oboe PHP extension is not installed.'), 'error');
   }
+
+  if (!($tracelytics_layers_modules = module_exists('tracelytics_early') && module_exists('tracelytics_late'))) {
+    drupal_set_message(t('tracelytics_early and tracelytics_late must be installed in order to track layers.'), 'warning');
+  }
+
+  if (!($drush_integration = ini_get('oboe.tracing') == 'always')) {
+    drupal_set_message(t('oboe.tracing must be configured to "always" in order to trace drush commands.'), 'warning');
+  }
+
   $form = array();
   $form['tracelytics_partition_traffic'] = array(
     '#type' => 'checkbox',
@@ -52,11 +61,38 @@ function tracelytics_admin_settings() {
     '#disabled' => !(function_exists('oboe_log')),
   );
   $form['tracelytics_log_errors'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Track watchdog'),
-      '#description' => t('Enable tracking of watchdog entries of WATCHDOG_WARNING or greater severity as errors.'),
-      '#default_value' => variable_get('tracelytics_log_errors', FALSE),
-      '#disabled' => !(function_exists('oboe_log')),
+    '#type' => 'checkbox',
+    '#title' => t('Track watchdog'),
+    '#description' => t('Enable tracking of watchdog entries of WATCHDOG_WARNING or greater severity as errors.'),
+    '#default_value' => variable_get('tracelytics_log_errors', FALSE),
+    '#disabled' => !(function_exists('oboe_log')),
+  );
+  $form['tracelytics_layers'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Track layers'),
+    '#description' => t('Enable tracking of Drupal layers via hooks.'),
+    '#default_value' => variable_get('tracelytics_layers', FALSE),
+    '#disabled' => !$tracelytics_layers_modules,
+  );
+  $form['tracelytics_drush'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'Drush integration',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['tracelytics_drush']['tracelytics_partition_drush_traffic'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Partition traffic'),
+    '#description' => t('Enable partitioning of traffic into drush, cron, anonymous and authenticated.'),
+    '#default_value' => variable_get('tracelytics_partition_drush_traffic', FALSE),
+    '#disabled' => !$drush_integration,
+  );
+  $form['tracelytics_drush']['tracelytics_track_drush_commands'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Track active menu items'),
+    '#description' => t('Enable tracking of the active menu item and first argument as Controller/Action.'),
+    '#default_value' => variable_get('tracelytics_track_drush_commands', FALSE),
+    '#disabled' => !$drush_integration,
   );
   return system_settings_form($form);
 }
@@ -67,6 +103,9 @@ function tracelytics_admin_settings() {
  * Record errors to tracelytics.
  */
 function tracelytics_watchdog($log_entry) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_watchdog', 'entry', array());
+  }
   if (variable_get('tracelytics_log_errors', FALSE)
       && $log_entry['severity'] <= WATCHDOG_WARNING
       && $log_entry['type'] != 'php') {
@@ -78,27 +117,34 @@ function tracelytics_watchdog($log_entry) {
 /**
  * Implements hook_exit().
  *
- * Utilize oboe_log for traffic partitioning.
+ * Record tracelytics traffic partitioning and controller.
  */
 function tracelytics_exit() {
-  global $user;
+  global $user, $_tracelytics_partition;
 
-  // Partition traffic
+  // Partition traffic.
   if (variable_get('tracelytics_partition_traffic', FALSE)) {
-    switch ($user->uid) {
-      case 1:
-        oboe_log('info', array('Partition' => 'Admin'));
-        break;
-      case 0:
-        oboe_log('info', array('Partition' => 'Anonymous'));
-        break;
-      default:
-        oboe_log('info', array('Partition' => 'Authenticated'));
-        break;
+    if (!empty($_tracelytics_partition)) {
+      oboe_log('info', array('Partition' => $_tracelytics_partition));
+    }
+    else {
+      switch ($user->uid) {
+        case 1:
+          oboe_log('info', array('Partition' => 'Admin'));
+          break;
+
+        case 0:
+          oboe_log('info', array('Partition' => 'Anonymous'));
+          break;
+
+        default:
+          oboe_log('info', array('Partition' => 'Authenticated'));
+          break;
+      }
     }
   }
 
-  // Track active menu item
+  // Track active menu item.
   if (variable_get('tracelytics_track_menu', FALSE) && $router_item = menu_get_item()) {
     oboe_log('info',
       array(
@@ -112,15 +158,15 @@ function tracelytics_exit() {
 /**
  * Implements hook_cron().
  *
- * Utilize oboe_log for traffic partitioning.
+ * Record tracelytics traffic partitioning and controller within cron.
  */
 function tracelytics_cron() {
-  // Partition traffic
+  // Partition cron traffic.
   if (variable_get('tracelytics_partition_traffic', FALSE)) {
     oboe_log('info', array('Partition' => 'Cron'));
   }
 
-  // Track active menu item
+  // Track active menu item.
   if (variable_get('tracelytics_track_menu', FALSE)) {
     oboe_log('info',
       array(
@@ -134,7 +180,11 @@ function tracelytics_cron() {
 /**
  * Get an action string from an unknown argument type.
  *
- * @param unknown_type $argument
+ * @param $argument
+ *   Argument variable as passed to menu callback.
+ *
+ * @return string
+ *   Description (or string conversion) of $argument.
  */
 function tracelytics_get_action($argument) {
   switch (gettype($argument)) {
@@ -170,4 +220,15 @@ function tracelytics_get_action($argument) {
       break;
   }
   return $action;
+}
+
+/**
+ * Set the tracelytics partition.
+ *
+ * @param string $partition
+ *   Traffic partition name.
+ */
+function tracelytics_set_partition($partition) {
+  global $_tracelytics_partition;
+  $_tracelytics_partition = $partition;
 }

@@ -1,0 +1,84 @@
+<?php
+
+/**
+ * @file
+ * Module file for tracelytics_early module
+ */
+
+/**
+ * Implements hook_boot().
+ */
+function tracelytics_early_boot() {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_boot', 'entry', array());
+  }
+}
+
+/**
+ * Implements hook_init().
+ */
+function tracelytics_early_init() {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_init', 'entry', array());
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * @param array $form
+ * @param array $form_state
+ * @param string $form_id
+ */
+function tracelytics_early_form_alter(&$form, &$form_state, $form_id) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_form_alter', 'entry', array());
+  }
+}
+
+/**
+ * Implements hook_views_pre_view().
+ *
+ * @param object $view
+ * @param string $display_id
+ * @param array $args
+ */
+function tracelytics_early_views_pre_view(&$view, &$display_id, &$args) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_views', 'entry', array());
+  }
+}
+
+/**
+ * Implements hook_nodeapi().
+ *
+ * @param object $node
+ * @param string $op
+ * @param array $a3
+ * @param array $a4
+ */
+function tracelytics_early_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op == 'load' && variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_node_load', 'entry', array());
+  }
+}
+
+/**
+ * Implements hook_watchdog().
+ *
+ * @param array $log_entry
+ */
+function tracelytics_early_watchdog($log_entry) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_watchdog', 'entry', array());
+  }
+}
+
+/**
+ * Implements hook_exit().
+ */
+function tracelytics_early_exit() {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_exit', 'entry', array());
+  }
+}

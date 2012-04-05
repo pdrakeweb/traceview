@@ -1,0 +1,5 @@
+name = tracelytics_context
+description = Provide context integration for the tracelytics module.
+core = 6.x
+dependencies[] = tracelytics
+dependencies[] = context
