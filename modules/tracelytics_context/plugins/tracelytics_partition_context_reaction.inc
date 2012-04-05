@@ -21,7 +21,7 @@ class tracelytics_partition extends context_reaction {
       'partition' => array(
         '#title' => t('Tracelytics Partition'),
         '#description' => t('Enter a tracelytics partition to use when this context is active.'),
-        '#type' => 'textbox',
+        '#type' => 'textfield',
         '#default_value' => NULL,
       ),
     );

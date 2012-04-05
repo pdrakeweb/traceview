@@ -77,6 +77,8 @@ function tracelytics_uninstall() {
     'tracelytics_track_menu',
     'tracelytics_log_errors',
     'tracelytics_layers',
+    'tracelytics_partition_drush_traffic',
+    'tracelytics_track_drush_commands',
   );
   foreach ($tracelytics_vars as $var) {
     variable_del($var);
