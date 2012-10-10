@@ -146,13 +146,29 @@ function tracelytics_exit() {
 
   // Track active menu item.
   if (variable_get('tracelytics_track_menu', FALSE) && $router_item = menu_get_item()) {
-    oboe_log('info',
+    tracelytics_set_controller(
       array(
         'Controller' => $router_item['page_callback'],
         'Action' => (isset($router_item['page_arguments'][0]) ? tracelytics_get_action($router_item['page_arguments'][0]) : 'NULL'),
       )
     );
   }
+
+  $controller = tracelytics_set_controller(NULL, FALSE, TRUE);
+  if (!empty($controller)) {
+    oboe_log('info', $controller);
+  }
+}
+
+function tracelytics_set_controller($controller = NULL, $override = FALSE, $alter = FALSE) {
+  static $tracelytics_controller = array();
+  if (!empty($controller) && ($override || empty($tracelytics_controller))) {
+    $tracelytics_controller = $controller;
+  }
+  if ($alter) {
+    drupal_alter('tracelytics_controller', $tracelytics_controller);
+  }
+  return $tracelytics_controller;
 }
 
 /**
