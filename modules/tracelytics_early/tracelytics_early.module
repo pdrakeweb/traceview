@@ -57,7 +57,8 @@ function tracelytics_early_views_pre_view(&$view, &$display_id, &$args) {
  */
 function tracelytics_early_node_load($nodes, $types) {
   if (variable_get('tracelytics_layers', FALSE)) {
-    foreach($nodes as $nid => $node) {
+    $nids = array();
+    foreach($nodes as $node) {
       $nids[] = $node->nid;
     }
     oboe_log('drupal_hook_node_load', 'entry', array('Node-NIDs' => implode(',', $nids), 'Node-Types' => implode(',', $types)));
