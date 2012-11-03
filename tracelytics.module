@@ -100,7 +100,7 @@ function tracelytics_admin_settings() {
     '#title' => t('Track active menu items'),
     '#description' => t('Enable tracking of the active menu item and first argument as Controller/Action.'),
     '#default_value' => variable_get('tracelytics_track_menu', FALSE),
-    '#disabled' => !(function_exists('oboe_log')),
+    '#disabled' => !(function_exists('oboe_log') && function_exists('menu_get_item')),
   );
   $form['tracelytics_log_errors'] = array(
     '#type' => 'checkbox',
