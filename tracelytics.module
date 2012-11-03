@@ -6,6 +6,18 @@
  */
 
 /**
+ * Implements hook_init().
+ *
+ * Include tracelytics RUM javascripts if enabled.
+ */
+function tracelytics_init() {
+  if (variable_get('tracelytics_rum', FALSE)) {
+    drupal_add_js(oboe_get_rum_header(FALSE), 'inline', 'header', FALSE, FALSE, FALSE);
+    drupal_add_js(oboe_get_rum_footer(FALSE), 'inline', 'footer', FALSE, FALSE, FALSE);
+  }
+}
+
+/**
  * Implements hook_menu().
  */
 function tracelytics_menu() {
@@ -52,6 +64,13 @@ function tracelytics_admin_settings() {
     '#description' => t('Enable partitioning of traffic into drush, cron, anonymous and authenticated.'),
     '#default_value' => variable_get('tracelytics_partition_traffic', FALSE),
     '#disabled' => !(function_exists('oboe_log')),
+  );
+  $form['tracelytics_rum'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Track RUM'),
+    '#description' => t('Enable tracking of Real User Monitoring data via javascript.'),
+    '#default_value' => variable_get('tracelytics_rum', FALSE),
+    '#disabled' => !(function_exists('oboe_get_rum_header')),
   );
   $form['tracelytics_track_menu'] = array(
     '#type' => 'checkbox',
