@@ -9,7 +9,8 @@ function tracelytics_services_tracelytics_controller_alter(&$controller) {
 
 function tracelytics_services_services_request_preprocess_alter(&$controller, $args, $options) {
   $endpoint_name = services_get_server_info('endpoint');
-  tracelytics_services_set_controller($endpoint_name, $options['resource']);
+  $action = $controller['callback'];
+  tracelytics_services_set_controller($endpoint_name, $action);
 }
 
 function tracelytics_services_set_controller($controller = NULL, $action = NULL) {
