@@ -30,6 +30,7 @@ function tracelytics_requirements($phase) {
   $requirements = array();
 
   switch ($phase) {
+    case 'install':
     case 'runtime':
       if (!function_exists('oboe_log')) {
         $requirements['tracelytics'] = array(
