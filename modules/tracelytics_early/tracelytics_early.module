@@ -94,7 +94,7 @@ function tracelytics_early_watchdog($log_entry) {
  */
 function tracelytics_early_page_delivery_callback_alter(&$callback) {
   if (variable_get('tracelytics_layers', FALSE)) {
-    tracelytics_early_page_callback(FALSE);
+    tracelytics_early_page_callback(FALSE, $callback);
   }
 }
 
@@ -105,7 +105,7 @@ function tracelytics_early_page_delivery_callback_alter(&$callback) {
  */
 function tracelytics_early_page_build(&$page) {
   if (variable_get('tracelytics_layers', FALSE)) {
-    tracelytics_early_page_callback(FALSE);
+    tracelytics_early_page_callback(FALSE, 'drupal_render_page');
   }
 }
 
@@ -127,13 +127,13 @@ function tracelytics_early_page_callback($entry = TRUE, $callback_function = NUL
   static $menu_layer_active = FALSE;
 
   if ($menu_layer_active == FALSE && $entry) {
-    oboe_log('drupal_page_callback', 'entry', array('Page Callback' => $callback_function));
+    oboe_log('drupal_page_callback', 'entry', array('Page-Callback' => $callback_function));
     $menu_layer_active = TRUE;
   }
   // In contrast to most other layers, we register the exit in tracelytics_early
   // because this exit is logged after the active handler returns.
   elseif ($menu_layer_active == TRUE) {
-    oboe_log('drupal_page_callback', 'exit', array());
+    oboe_log('drupal_page_callback', 'exit', array('Delivery-Callback' => $callback_function));
     $menu_layer_active = FALSE;
   }
 }
