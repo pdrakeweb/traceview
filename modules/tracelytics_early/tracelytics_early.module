@@ -24,6 +24,15 @@ function tracelytics_early_init() {
 }
 
 /**
+ * Implements hook_menu_site_status_alter().
+ */
+function tracelytics_early_menu_site_status_alter($page_callback_result, $read_only_path) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    tracelytics_early_page_callback(TRUE);
+  }
+}
+
+/**
  * Implements hook_form_alter().
  *
  * @param array $form
@@ -77,10 +86,52 @@ function tracelytics_early_watchdog($log_entry) {
 }
 
 /**
+ * Implements hook_page_delivery_callback_alter().
+ *
+ * @param array $callback
+ */
+function tracelytics_early_page_delivery_callback_alter(&$callback) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    tracelytics_early_page_callback(FALSE);
+  }
+}
+
+/**
+ * Implements hook_page_build().
+ *
+ * @param array $page
+ */
+function tracelytics_early_page_build(&$page) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    tracelytics_early_page_callback(FALSE);
+  }
+}
+
+/**
  * Implements hook_exit().
  */
 function tracelytics_early_exit() {
   if (variable_get('tracelytics_layers', FALSE)) {
     oboe_log('drupal_hook_exit', 'entry', array());
+  }
+}
+
+/**
+ * Helper function to register entry/exit of the drupal_page_callback layer.
+ *
+ * @param bool $entry
+ */
+function tracelytics_early_page_callback($entry = TRUE) {
+  static $layer_active = FALSE;
+
+  if ($menu_layer_active == FALSE && $entry) {
+    oboe_log('drupal_page_callback', 'entry', array());
+    $menu_layer_active = TRUE;
+  }
+  // In contrast to most other layers, we register the exit in tracelytics_early
+  // because this exit is logged after the active handler returns.
+  elseif ($menu_layer_active == TRUE) {
+    oboe_log('drupal_page_callback', 'exit', array());
+    $menu_layer_active = FALSE;
   }
 }
