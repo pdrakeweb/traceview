@@ -114,6 +114,7 @@ function tracelytics_early_page_build(&$page) {
  */
 function tracelytics_early_exit() {
   if (variable_get('tracelytics_layers', FALSE)) {
+    tracelytics_early_page_callback(FALSE, 'none');
     oboe_log('drupal_hook_exit', 'entry', array());
   }
 }
