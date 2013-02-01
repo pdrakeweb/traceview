@@ -145,9 +145,6 @@ function tracelytics_admin_settings() {
  * Record errors to tracelytics.
  */
 function tracelytics_watchdog($log_entry) {
-  if (variable_get('tracelytics_layers', FALSE)) {
-    oboe_log('drupal_hook_watchdog', 'entry', array());
-  }
   if (variable_get('tracelytics_log_errors', FALSE)
       && $log_entry['severity'] <= WATCHDOG_WARNING
       && $log_entry['type'] != 'php') {
@@ -187,7 +184,9 @@ function tracelytics_exit() {
   }
 
   // Track active menu item.
-  if (variable_get('tracelytics_track_menu', FALSE) && $router_item = menu_get_item()) {
+  if (function_exists('menu_get_item')
+      && variable_get('tracelytics_track_menu', FALSE)
+      && $router_item = menu_get_item()) {
     tracelytics_set_controller(
       array(
         'Controller' => $router_item['page_callback'],
@@ -202,12 +201,26 @@ function tracelytics_exit() {
   }
 }
 
+/**
+ * Set the controller to be reported to tracelytics.
+ *
+ * @param array $controller
+ *   The controller array to be reported to tracelytics.
+ * @param bool $override
+ *   Flag to indicate whether the passed controller should override previously
+ *   set controller array.
+ * @param bool $alter
+ *   Flag to indicate whether to call hook_alter on the controller array.
+ *
+ * @return array
+ *   The controller array to be reported to tracelytics.
+ */
 function tracelytics_set_controller($controller = NULL, $override = FALSE, $alter = FALSE) {
   static $tracelytics_controller = array();
   if (!empty($controller) && ($override || empty($tracelytics_controller))) {
     $tracelytics_controller = $controller;
   }
-  if ($alter) {
+  if (function_exists('drupal_alter') && $alter) {
     drupal_alter('tracelytics_controller', $tracelytics_controller);
   }
   return $tracelytics_controller;
@@ -238,7 +251,7 @@ function tracelytics_cron() {
 /**
  * Get an action string from an unknown argument type.
  *
- * @param $argument
+ * @param mixed $argument
  *   Argument variable as passed to menu callback.
  *
  * @return string
