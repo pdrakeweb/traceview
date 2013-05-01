@@ -1,5 +1,6 @@
-name = tracelytics_services
-description = Provide services integration for the tracelytics module.
+name = Tracelytics Services
+description = Provide integration for tracking Services in AppNeta TraceView (formerly Tracelytics).
 core = 7.x
+package = TraceView (Tracelytics)
 dependencies[] = tracelytics
 dependencies[] = services

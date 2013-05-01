@@ -1,4 +1,5 @@
-name = tracelytics
-description = Provide integration between drupal and tracelytics web application monitoring.
+name = Tracelytics
+description = Provide additional integration between Drupal and AppNeta TraceView (formerly Tracelytics) web application monitoring.
 core = 7.x
+package = TraceView (Tracelytics)
 configure = admin/config/system/tracelytics
