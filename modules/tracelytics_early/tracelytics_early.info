@@ -1,4 +1,5 @@
-name = tracelytics_early
-description = Provide early hooks for registering layers in tracelytics.
+name = Tracelytics Layers (Early)
+description = Provide early-hook integration for tracking core and contrib modules as layers in AppNeta TraceView (formerly Tracelytics).
 core = 6.x
+package = TraceView (Tracelytics)
 dependencies[] = tracelytics
