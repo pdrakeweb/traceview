@@ -295,6 +295,7 @@ function tracelytics_set_partition($partition) {
  * missing functions as empty functions provided the tracelytics_fail_silently
  * configuration setting is not empty.
  */
+global $conf;
 if (!empty($conf['tracelytics_fail_silently'])) {
   if (!function_exists('oboe_log')) {
     // These functions intentionally left empty.
