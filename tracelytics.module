@@ -82,8 +82,8 @@ function tracelytics_admin_settings() {
     drupal_set_message(t('tracelytics_early and tracelytics_late must be installed in order to track layers.'), 'warning');
   }
 
-  if (!($drush_integration = ini_get('oboe.tracing') == 'always')) {
-    drupal_set_message(t('oboe.tracing must be configured to "always" in order to trace drush commands.'), 'warning');
+  if (variable_get('tracelytics_partition_drush_traffic', FALSE) || variable_get('tracelytics_track_drush_commands', FALSE)) {
+    drupal_set_message(t('oboe.tracing must be configured to "always" for PHP CLI in order to trace drush commands.'), 'notice');
   }
 
   $form = array();
@@ -133,14 +133,12 @@ function tracelytics_admin_settings() {
     '#title' => t('Partition traffic'),
     '#description' => t('Enable partitioning of traffic into drush, cron, anonymous and authenticated.'),
     '#default_value' => variable_get('tracelytics_partition_drush_traffic', FALSE),
-    '#disabled' => !$drush_integration,
   );
   $form['tracelytics_drush']['tracelytics_track_drush_commands'] = array(
     '#type' => 'checkbox',
     '#title' => t('Track active menu items'),
     '#description' => t('Enable tracking of the active menu item and first argument as Controller/Action.'),
     '#default_value' => variable_get('tracelytics_track_drush_commands', FALSE),
-    '#disabled' => !$drush_integration,
   );
   return system_settings_form($form);
 }
