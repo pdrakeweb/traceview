@@ -45,8 +45,14 @@ function tracelytics_perm() {
  * Provide administrative options to enable/disable tracelytics functionality.
  */
 function tracelytics_admin_settings() {
+  global $conf;
+
   if (!(function_exists('oboe_log'))) {
     drupal_set_message(t('Required Oboe PHP extension is not installed.'), 'error');
+  }
+
+  if (empty($conf['tracelytics_fail_silently'])) {
+    drupal_set_message(t('The tracelytics module is not configured to fail silently.  Removal of the php-oboe extension may cause fatal errors.'), 'warning');
   }
 
   if (!($tracelytics_layers_modules = module_exists('tracelytics_early') && module_exists('tracelytics_late'))) {
@@ -279,4 +285,21 @@ function tracelytics_get_action($argument) {
 function tracelytics_set_partition($partition) {
   global $_tracelytics_partition;
   $_tracelytics_partition = $partition;
+}
+
+/**
+ * In order to support configurations where the php-oboe extension may or may
+ * not be available during a given application execution, such as during the
+ * execution of a drush command, on a singler server in a cluster or on a non-
+ * production environment, the following code will optionally define the
+ * missing functions as empty functions provided the tracelytics_fail_silently
+ * configuration setting is not empty.
+ */
+if (!empty($conf['tracelytics_fail_silently'])) {
+  if (!function_exists('oboe_log')) {
+    // These functions intentionally left empty.
+    function oboe_log() {}
+    function oboe_get_rum_header() {}
+    function oboe_get_rum_footer() {}
+  }
 }
