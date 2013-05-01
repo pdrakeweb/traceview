@@ -50,6 +50,18 @@ function tracelytics_early_views_pre_view(&$view, &$display_id, &$args) {
 }
 
 /**
+ * Implements hook_panels_pre_render().
+ *
+ * @param object $display
+ * @param object $renderer
+ */
+function tracelytics_early_panels_pre_render($display, $renderer) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_panels', 'entry', array('Panel-Renderer' => $display->renderer, 'Panel-Layout' => $display->layout));
+  }
+}
+
+/**
  * Implements hook_nodeapi().
  *
  * @param object $node
