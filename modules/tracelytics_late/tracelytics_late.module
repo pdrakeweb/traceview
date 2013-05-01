@@ -87,6 +87,15 @@ function tracelytics_late_watchdog($log_entry) {
 }
 
 /**
+ * Implements hook_footer().
+ */
+function tracelytics_late_footer($main = 0) {
+  if (variable_get('tracelytics_layers', FALSE)) {
+    oboe_log('drupal_hook_footer', 'footer', array());
+  }
+}
+
+/**
  * Implements hook_exit().
  */
 function tracelytics_late_exit() {
