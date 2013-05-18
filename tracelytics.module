@@ -316,14 +316,14 @@ function tracelytics_set_partition($partition) {
  * @param mixed $param3
  * @param boolean $backtrace
  */
-function tracelytics_oboe_log($param1, $param2, $param3 = array(), $backtrace = NULL) {
+function tracelytics_oboe_log($param1, $param2, $param3 = NULL, $backtrace = NULL) {
   // By default, log a backtrace for all layer entry calles, unless explicitly
   // disabled by setting $backtrace to FALSE.
   if ($backtrace === NULL && $param2 == 'entry') {
     $backtrace = TRUE;
   }
-  if (!$backtrace || compare_version(phpversion('oboe'), '0.4.7', '<')) {
-      if (empty($param3)) {
+  if (!$backtrace || version_compare(phpversion('oboe'), '1.1.2', '<')) {
+      if ($param3 === NULL) {
         oboe_log($param1, $param2);
       }
       else {
@@ -331,7 +331,12 @@ function tracelytics_oboe_log($param1, $param2, $param3 = array(), $backtrace = 
       }
   }
   else {
-    oboe_log($param1, $param2, $param3, TRUE);
+    if ($param3 === NULL) {
+      oboe_log($param1, $param2, TRUE);
+    }
+    else {
+      oboe_log($param1, $param2, $param3, TRUE);
+    }
   }
 }
 
