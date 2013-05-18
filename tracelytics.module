@@ -296,8 +296,9 @@ function tracelytics_cron() {
  * @param array $batch
  */
 function tracelytics_batch_alter($batch) {
-  if ($batch['file'] == 'inc/update.inc' && variable_get('tracelytics_annotate_updates', FALSE)) {
-    $update_count = count($batch['operations']);
+  $current_batch = $batch['sets'][0];
+  if ($current_batch['file'] == 'includes/update.inc' && variable_get('tracelytics_annotate_updates', FALSE)) {
+    $update_count = count($current_batch['operations']);
     tracelytics_add_annotation('Module updates run (' . $update_count . ' updates).');
   }
 }
@@ -419,6 +420,7 @@ function tracelytics_add_annotation($message, $params = array()) {
   );
 
   $params = array_merge($default_params, $params);
+  $params['message'] = $message;
 
   if (empty($params['key'])) {
     watchdog('tracelytics', "Failed to add TraceView annotation '%annotation': no TraceView client key has been set.", array('%annotation' => $message), WATCHDOG_ERROR);
