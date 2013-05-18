@@ -274,15 +274,39 @@ function tracelytics_exit() {
   }
 
   // Track active menu item.
-  if (function_exists('menu_get_item')
-      && variable_get('tracelytics_track_menu', FALSE)
-      && $router_item = menu_get_item()) {
-    tracelytics_set_controller(
-      array(
+  if (variable_get('tracelytics_track_menu', FALSE)) {
+    // Report the menu entry if we can determine the proper one.
+    if (function_exists('menu_get_item')  && $router_item = menu_get_item()) {
+      $controller = array(
         'Controller' => $router_item['page_callback'],
         'Action' => (isset($router_item['page_arguments'][0]) ? tracelytics_get_action($router_item['page_arguments'][0]) : 'NULL'),
-      )
-    );
+      );
+    }
+    // Else, report if the page is retrieved from cache.
+    elseif (drupal_page_get_cache(TRUE)) {
+      $controller = array(
+        'Controller' => 'drupal_page_cache',
+        'Action' => 'NULL',
+      );
+    }
+    // Otherwise, report the bootstrap phase reached.
+    else {
+      $phase_names = array(
+        DRUPAL_BOOTSTRAP_CONFIGURATION => "configuration",
+        DRUPAL_BOOTSTRAP_PAGE_CACHE => "page_cache",
+        DRUPAL_BOOTSTRAP_DATABASE => "database",
+        DRUPAL_BOOTSTRAP_VARIABLES => "variables",
+        DRUPAL_BOOTSTRAP_SESSION => "session",
+        DRUPAL_BOOTSTRAP_PAGE_HEADER => "page_header",
+        DRUPAL_BOOTSTRAP_LANGUAGE => "language",
+        DRUPAL_BOOTSTRAP_FULL => "full",
+      );
+      $controller = array(
+        'Controller' => 'drupal_bootstrap',
+        'Action' => $phase_names[drupal_get_bootstrap_phase()],
+      );
+    }
+    tracelytics_set_controller($controller);
   }
 
   $controller = tracelytics_set_controller(NULL, FALSE, TRUE);
