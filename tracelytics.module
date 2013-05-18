@@ -191,7 +191,7 @@ function tracelytics_watchdog($log_entry) {
       && $log_entry['severity'] <= WATCHDOG_WARNING
       && $log_entry['type'] != 'php') {
     $message = filter_xss(is_null($log_entry['variables']) ? $log_entry['message'] : strtr($log_entry['message'], $log_entry['variables']));
-    tracelytics_oboe_log('info', array('ErrorClass' => $log_entry['type'], 'ErrorMsg' => $message), array(), TRUE);
+    tracelytics_oboe_log('info', array('ErrorClass' => $log_entry['type'], 'ErrorMsg' => $message), TRUE);
   }
 }
 
