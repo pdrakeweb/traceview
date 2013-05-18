@@ -51,17 +51,16 @@ function tracelytics_requirements($phase) {
     case 'update':
       // Partition update traffic.
       if (variable_get('tracelytics_partition_traffic', FALSE)) {
-        oboe_log('info', array('Partition' => 'Update'));
+        tracelytics_set_partition('Update');
       }
 
       // Track active menu item.
       if (variable_get('tracelytics_track_menu', FALSE)) {
-        oboe_log('info',
-          array(
-            'Controller' => 'update',
-            'Action' => NULL,
-          )
+        $controller = array(
+          'Controller' => 'update',
+          'Action' => NULL,
         );
+        tracelytics_set_controller($controller, TRUE, FALSE);
       }
       break;
   }
