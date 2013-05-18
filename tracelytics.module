@@ -74,7 +74,7 @@ function tracelytics_admin_settings() {
     drupal_set_message(t('Required Oboe PHP extension is not installed.'), 'error');
   }
 
-  if (empty($conf['tracelytics_fail_silently'])) {
+  if ($conf['tracelytics_fail_silently'] === FALSE) {
     drupal_set_message(t('The tracelytics module is not configured to fail silently.  Removal of the php-oboe extension may cause fatal errors.'), 'warning');
   }
 
@@ -533,10 +533,11 @@ function tracelytics_drupal_http_request($url, array $options = array()) {
  * configuration setting is not empty.
  */
 global $conf;
-if (!empty($conf['tracelytics_fail_silently'])) {
+if ($conf['tracelytics_fail_silently'] !== FALSE) {
   if (!function_exists('oboe_log')) {
     // These functions intentionally left empty.
     function oboe_log() {}
+    function oboe_get_context() {}
     function oboe_get_rum_header() {}
     function oboe_get_rum_footer() {}
   }
