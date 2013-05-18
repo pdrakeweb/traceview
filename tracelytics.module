@@ -201,11 +201,12 @@ function tracelytics_watchdog($log_entry) {
  * Record tracelytics traffic partitioning and controller.
  */
 function tracelytics_exit() {
-  global $user, $_tracelytics_partition;
+  global $user;
 
   // Partition traffic.
   if (variable_get('tracelytics_partition_traffic', FALSE)) {
-    if (!empty($_tracelytics_partition)) {
+    $tracelytics_partition = tracelytics_set_partition();
+    if (!empty($tracelytics_partition)) {
       oboe_log('info', array('Partition' => $tracelytics_partition));
     }
     else {
