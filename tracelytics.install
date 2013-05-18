@@ -83,7 +83,7 @@ function tracelytics_uninstall() {
     'tracelytics_key',
     'tracelytics_annotation_appname',
     'tracelytics_annotation_username',
-    'tracelytics_annotate_updates',
+    'tracelytics_annotate_modules',
   );
   foreach ($tracelytics_vars as $var) {
     variable_del($var);

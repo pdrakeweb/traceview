@@ -165,11 +165,11 @@ function tracelytics_admin_settings() {
     '#description' => t("Provide the username that annotations should be associated with. This can be overriden on each call to `tracelytics_add_annotation`. If not provided, this will default to the site name, or 'Drupal' if no site name is set."),
     '#default_value' => variable_get('tracelytics_annotation_username', ''),
   );
-  $form['tracelytics_api']['annotations']['tracelytics_annotate_updates'] = array(
+  $form['tracelytics_api']['annotations']['tracelytics_annotate_modules'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Annotate module updates'),
-    '#description' => t('Record an annotation when module updates are run.'),
-    '#default_value' => variable_get('tracelytics_annotate_updates', FALSE),
+    '#title' => t('Annotate module changes'),
+    '#description' => t('Record an annotation when modules are enabled/disabled or module updates are run.'),
+    '#default_value' => variable_get('tracelytics_annotate_modules', FALSE),
   );
   $form['tracelytics_drush'] = array(
     '#type' => 'fieldset',
@@ -325,9 +325,33 @@ function tracelytics_cron() {
  */
 function tracelytics_batch_alter($batch) {
   $current_batch = $batch['sets'][0];
-  if ($current_batch['file'] == 'includes/update.inc' && variable_get('tracelytics_annotate_updates', FALSE)) {
+  if ($current_batch['file'] == 'includes/update.inc' && variable_get('tracelytics_annotate_modules', FALSE)) {
     $update_count = count($current_batch['operations']);
     tracelytics_add_annotation('Module updates run (' . $update_count . ' updates).');
+  }
+}
+
+/**
+ * Implements hook_modules_enabled().
+ *
+ * @param array $modules
+ */
+function tracelytics_modules_enabled($modules) {
+  if (variable_get('tracelytics_annotate_modules', FALSE)) {
+    $enabled_count = count($modules);
+    tracelytics_add_annotation($enabled_count . ' module(s) enabled (' . implode(', ', $modules) . ').');
+  }
+}
+
+/**
+ * Implements hook_modules_disabled().
+ *
+ * @param array $modules
+ */
+function tracelytics_modules_disabled($modules) {
+  if (variable_get('tracelytics_annotate_modules', FALSE)) {
+    $enabled_count = count($modules);
+    tracelytics_add_annotation($enabled_count . ' module(s) disabled (' . implode(', ', $modules) . ').');
   }
 }
 
