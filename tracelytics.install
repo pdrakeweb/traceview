@@ -32,7 +32,7 @@ function tracelytics_requirements($phase) {
   switch ($phase) {
     case 'install':
     case 'runtime':
-      if (!function_exists('oboe_log')) {
+      if (!extension_loaded('oboe')) {
         $requirements['tracelytics'] = array(
           'value' => t('Not installed'),
           'severity' => REQUIREMENT_ERROR,
@@ -79,6 +79,11 @@ function tracelytics_uninstall() {
     'tracelytics_layers',
     'tracelytics_partition_drush_traffic',
     'tracelytics_track_drush_commands',
+    'tracelytics_drupal_http_request',
+    'tracelytics_key',
+    'tracelytics_annotation_appname',
+    'tracelytics_annotation_username',
+    'tracelytics_annotate_updates',
   );
   foreach ($tracelytics_vars as $var) {
     variable_del($var);
