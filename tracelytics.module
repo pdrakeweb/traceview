@@ -129,7 +129,7 @@ function tracelytics_admin_settings() {
   );
   $form['tracelytics_drupal_http_request'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Track drupal_http_request'),
+    '#title' => t('Track drupal_http_request() calls'),
     '#description' => t('Enable tracking of drupal_http_request calls.  This requires Drupal 7.22 or above (see http://drupal.org/drupal-7.22-release-notes).'),
     '#default_value' => ('tracelytics_drupal_http_request' === variable_get('drupal_http_request_function', FALSE)),
     '#disabled' => version_compare(VERSION, '7.22', '<') || $drupal_http_request_function !== 'tracelytics_drupal_http_request',
