@@ -79,7 +79,7 @@ function tracelytics_early_panels_pre_render($display, $renderer) {
  */
 function tracelytics_early_views_pre_build(&$view) {
   if (variable_get('tracelytics_layers', FALSE) && variable_get('tracelytics_profile_views', FALSE)) {
-    oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'pre_build'));
+    tracelytics_oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'pre_build'));
   }
 }
 
@@ -90,8 +90,8 @@ function tracelytics_early_views_pre_build(&$view) {
  */
 function tracelytics_early_views_post_build(&$view) {
   if (variable_get('tracelytics_layers', FALSE) && variable_get('tracelytics_profile_views', FALSE)) {
-    oboe_log('drupal_views', 'profile_exit', array('ProfileName' => 'build'));
-    oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'post_build'));
+    tracelytics_oboe_log('drupal_views', 'profile_exit', array('ProfileName' => 'build'));
+    tracelytics_oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'post_build'));
   }
 }
 
@@ -102,7 +102,7 @@ function tracelytics_early_views_post_build(&$view) {
  */
 function tracelytics_early_views_pre_execute(&$view) {
   if (variable_get('tracelytics_layers', FALSE) && variable_get('tracelytics_profile_views', FALSE)) {
-    oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'pre_execute'));
+    tracelytics_oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'pre_execute'));
   }
 }
 
@@ -113,8 +113,8 @@ function tracelytics_early_views_pre_execute(&$view) {
  */
 function tracelytics_early_views_post_execute(&$view) {
   if (variable_get('tracelytics_layers', FALSE) && variable_get('tracelytics_profile_views', FALSE)) {
-    oboe_log('drupal_views', 'profile_exit', array('ProfileName' => 'execute'));
-    oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'post_execute'));
+    tracelytics_oboe_log('drupal_views', 'profile_exit', array('ProfileName' => 'execute'));
+    tracelytics_oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'post_execute'));
   }
 }
 
@@ -125,7 +125,7 @@ function tracelytics_early_views_post_execute(&$view) {
  */
 function tracelytics_early_views_pre_render(&$view) {
   if (variable_get('tracelytics_layers', FALSE) && variable_get('tracelytics_profile_views', FALSE)) {
-    oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'pre_render'));
+    tracelytics_oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'pre_render'));
   }
 }
 
@@ -138,8 +138,8 @@ function tracelytics_early_views_pre_render(&$view) {
  */
 function tracelytics_early_views_post_render(&$view, &$output, &$cache) {
   if (variable_get('tracelytics_layers', FALSE) && variable_get('tracelytics_profile_views', FALSE)) {
-    oboe_log('drupal_views', 'profile_exit', array('ProfileName' => 'render'));
-    oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'post_render'));
+    tracelytics_oboe_log('drupal_views', 'profile_exit', array('ProfileName' => 'render'));
+    tracelytics_oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'post_render'));
   }
 }
 
