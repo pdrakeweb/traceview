@@ -86,6 +86,11 @@ function tracelytics_admin_settings() {
     drupal_set_message(t('oboe.tracing must be configured to "always" for PHP CLI in order to trace drush commands.'), 'notice');
   }
 
+  $drupal_http_request_function = variable_get('drupal_http_request_function', 'tracelytics_drupal_http_request');
+  if ($drupal_http_request_function !== 'tracelytics_drupal_http_request') {
+    drupal_set_message(t('Overriding the drupal_http_request_function variable is required in order to trace drupal_http_request calls. The variable has already been overridden (@function), possibly by another module.', array('@function' => $drupal_http_request_function)), 'warning');
+  }
+
   $form = array();
   $form['tracelytics_partition_traffic'] = array(
     '#type' => 'checkbox',
@@ -122,6 +127,13 @@ function tracelytics_admin_settings() {
     '#default_value' => variable_get('tracelytics_layers', FALSE),
     '#disabled' => !$tracelytics_layers_modules,
   );
+  $form['tracelytics_drupal_http_request'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Track drupal_http_request'),
+    '#description' => t('Enable tracking of drupal_http_request calls.  This requires Drupal 7.22 or above (see http://drupal.org/drupal-7.22-release-notes).'),
+    '#default_value' => ('tracelytics_drupal_http_request' === variable_get('drupal_http_request_function', FALSE)),
+    '#disabled' => version_compare(VERSION, '7.22', '<') || $drupal_http_request_function !== 'tracelytics_drupal_http_request',
+  );
   $form['tracelytics_drush'] = array(
     '#type' => 'fieldset',
     '#title' => 'Drush integration',
@@ -140,7 +152,23 @@ function tracelytics_admin_settings() {
     '#description' => t('Enable tracking of the active menu item and first argument as Controller/Action.'),
     '#default_value' => variable_get('tracelytics_track_drush_commands', FALSE),
   );
+  $form['#submit'][] = 'tracelytics_admin_settings_form_submit';
   return system_settings_form($form);
+}
+
+/**
+ * Implements hook_form_submit().
+ *
+ */
+function tracelytics_admin_settings_form_submit($form, &$form_state) {
+  $drupal_http_request_function = variable_get('drupal_http_request_function');
+  $enable = $form_state['values']['tracelytics_drupal_http_request'];
+  if (empty($drupal_http_request_function) && $enable) {
+    variable_set('drupal_http_request_function', 'tracelytics_drupal_http_request');
+  } else if ($drupal_http_request_function === 'tracelytics_drupal_http_request' && !$enable) {
+    variable_del('drupal_http_request_function');
+  }
+  unset($form_state['values']['tracelytics_drupal_http_request']);
 }
 
 /**
@@ -306,6 +334,58 @@ function tracelytics_get_action($argument) {
 function tracelytics_set_partition($partition) {
   global $_tracelytics_partition;
   $_tracelytics_partition = $partition;
+}
+
+/**
+ * Wrap calls to drupal_http_request, permitting layer creation and full-stack application tracing.
+ *
+ * Minimum Drupal version is 7.22: http://drupal.org/drupal-7.22-release-notes
+ *
+ * @param $url
+ *   A string containing a fully qualified URI.
+ * @param array $options
+ *   (optional) An array with options as per drupal_http_request().
+ */
+function tracelytics_drupal_http_request($url, array $options = array()) {
+  global $conf;
+
+  // Parse the URL for information about the query being made.
+  $uri = parse_url($url);
+
+  // Collect information about non-standard ports
+  $remote_host = $uri['host'];
+  $remote_host .= isset($uri['port']) && $uri['port'] != 80 ? ':' . $uri['port'] : '';
+
+  // Collect fragments and querystrings
+  $service_arg = $uri['path'];
+  $service_arg .= isset($uri['fragment']) ? $uri['fragment'] : '';
+  $service_arg .= isset($uri['query']) ? $uri['query'] : '';
+
+  // Start the drupal_http_request layer (with a backtrace).
+  oboe_log('drupal_http_request', 'entry', array(
+    'IsService' => 'True',
+    'RemoteProtocol' => $uri['scheme'],
+    'RemoteController' => 'drupal_http_request',
+    'RemoteHost' => $remote_host,
+    'ServiceArg' => $service_arg,
+  ), TRUE);
+
+  // Set an X-Trace header.
+  $options['headers']['X-Trace'] = oboe_get_context();
+
+  // Allow drupal_http_request to temporarily bypass the override.
+  unset($conf['drupal_http_request_function']);
+
+  // Call drupal_http_request.
+  $response = drupal_http_request($url, $options);
+
+  // Put the override back in place.
+  $conf['drupal_http_request_function'] = 'tracelytics_drupal_http_request';
+
+  // Stop the drupal_http_request layer.
+  oboe_log('drupal_http_request', 'exit', array('ResponseCode' => $response->code));
+
+  return $response;
 }
 
 /**
