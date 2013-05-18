@@ -354,7 +354,7 @@ function tracelytics_get_action($argument) {
  * @param string $partition
  *   Traffic partition name.
  */
-function tracelytics_set_partition($partition) {
+function tracelytics_set_partition($partition = NULL) {
   static $tracelytics_partition;
   if (!empty($partition)) {
     $tracelytics_partition = $partition;
