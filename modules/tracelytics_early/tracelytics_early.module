@@ -73,6 +73,77 @@ function tracelytics_early_panels_pre_render($display, $renderer) {
 }
 
 /**
+ * Implements hook_views_pre_build().
+ *
+ * @param object $view
+ */
+function tracelytics_early_views_pre_build(&$view) {
+  if (variable_get('tracelytics_layers', FALSE) && variable_get('tracelytics_profile_views', FALSE)) {
+    oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'pre_build'));
+  }
+}
+
+/**
+ * Implements hook_views_post_build().
+ *
+ * @param object $view
+ */
+function tracelytics_early_views_post_build(&$view) {
+  if (variable_get('tracelytics_layers', FALSE) && variable_get('tracelytics_profile_views', FALSE)) {
+    oboe_log('drupal_views', 'profile_exit', array('ProfileName' => 'build'));
+    oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'post_build'));
+  }
+}
+
+/**
+ * Implements hook_views_pre_execute().
+ *
+ * @param object $view
+ */
+function tracelytics_early_views_pre_execute(&$view) {
+  if (variable_get('tracelytics_layers', FALSE) && variable_get('tracelytics_profile_views', FALSE)) {
+    oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'pre_execute'));
+  }
+}
+
+/**
+ * Implements hook_views_post_execute().
+ *
+ * @param object $view
+ */
+function tracelytics_early_views_post_execute(&$view) {
+  if (variable_get('tracelytics_layers', FALSE) && variable_get('tracelytics_profile_views', FALSE)) {
+    oboe_log('drupal_views', 'profile_exit', array('ProfileName' => 'execute'));
+    oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'post_execute'));
+  }
+}
+
+/**
+ * Implements hook_views_pre_render().
+ *
+ * @param object $view
+ */
+function tracelytics_early_views_pre_render(&$view) {
+  if (variable_get('tracelytics_layers', FALSE) && variable_get('tracelytics_profile_views', FALSE)) {
+    oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'pre_render'));
+  }
+}
+
+/**
+ * Implements hook_views_post_render().
+ *
+ * @param object $view
+ * @param string $output
+ * @param object $cache
+ */
+function tracelytics_early_views_post_render(&$view, &$output, &$cache) {
+  if (variable_get('tracelytics_layers', FALSE) && variable_get('tracelytics_profile_views', FALSE)) {
+    oboe_log('drupal_views', 'profile_exit', array('ProfileName' => 'render'));
+    oboe_log('drupal_views', 'profile_entry', array('ProfileName' => 'post_render'));
+  }
+}
+
+/**
  * Implements hook_node_load().
  *
  * @param object $nodes
