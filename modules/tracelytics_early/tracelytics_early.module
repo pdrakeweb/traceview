@@ -69,6 +69,21 @@ function tracelytics_early_views_pre_view(&$view, &$display_id, &$args) {
 function tracelytics_early_panels_pre_render($display, $renderer) {
   if (variable_get('tracelytics_layers', FALSE)) {
     tracelytics_oboe_log('drupal_panels', 'entry', array('Panel-Renderer' => $display->renderer, 'Panel-Layout' => $display->layout));
+    if (variable_get('tracelytics_profile_panels', FALSE)) {
+      tracelytics_oboe_log('drupal_panels', 'profile_entry', array('ProfileName' => 'pre_render'));
+    }
+  }
+}
+
+/**
+ * Implements hook_panels_post_render().
+ *
+ * @param object $display
+ * @param object $renderer
+ */
+function tracelytics_early_panels_post_render($display, $renderer) {
+  if (variable_get('tracelytics_layers', FALSE) && variable_get('tracelytics_profile_panels', FALSE)) {
+    tracelytics_oboe_log('drupal_panels', 'profile_entry', array('ProfileName' => 'post_render'));
   }
 }
 

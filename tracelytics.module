@@ -151,7 +151,14 @@ function tracelytics_admin_settings() {
     '#title' => t('Views'),
     '#description' => t('Enable additional profiling information about Views.'),
     '#default_value' => variable_get('tracelytics_profile_views', FALSE),
-    '#disabled' => !($tracelytics_layers_modules && variable_get('tracelytics_layers', FALSE))
+    '#disabled' => !($tracelytics_layers_modules && variable_get('tracelytics_layers', FALSE) && module_exists('views')),
+  );
+  $form['tracelytics_layers_fieldset']['tracelytics_layers_detail']['tracelytics_profile_panels'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Panels'),
+    '#description' => t('Enable additional profiling information about Panels.'),
+    '#default_value' => variable_get('tracelytics_profile_panels', FALSE),
+    '#disabled' => !($tracelytics_layers_modules && variable_get('tracelytics_layers', FALSE) && module_exists('panels')),
   );
   $form['tracelytics_api'] = array(
     '#type' => 'fieldset',

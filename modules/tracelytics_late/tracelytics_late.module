@@ -111,6 +111,18 @@ function tracelytics_late_views_post_render(&$view, &$output, &$cache) {
 }
 
 /**
+ * Implements hook_panels_pre_render().
+ *
+ * @param object $display
+ * @param object $renderer
+ */
+function tracelytics_late_panels_pre_render($display, $renderer) {
+  if (variable_get('tracelytics_layers', FALSE) && variable_get('tracelytics_profile_panels', FALSE)) {
+    tracelytics_oboe_log('drupal_panels', 'profile_exit', array('ProfileName' => 'pre_render'));
+  }
+}
+
+/**
  * Implements hook_panels_post_render().
  *
  * @param object $display
@@ -118,6 +130,9 @@ function tracelytics_late_views_post_render(&$view, &$output, &$cache) {
  */
 function tracelytics_late_panels_post_render($display, $renderer) {
   if (variable_get('tracelytics_layers', FALSE)) {
+    if (variable_get('tracelytics_profile_panels', FALSE)) {
+      tracelytics_oboe_log('drupal_panels', 'profile_exit', array('ProfileName' => 'post_render'));
+    }
     tracelytics_oboe_log('drupal_panels', 'exit', array('Panel-Renderer' => $display->renderer, 'Panel-Layout' => $display->layout));
   }
 }
