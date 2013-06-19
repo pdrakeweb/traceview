@@ -29,7 +29,7 @@ function tracelytics_requirements($phase) {
   switch ($phase) {
     case 'install':
     case 'runtime':
-      if (!function_exists('oboe_log')) {
+      if (!extension_loaded('oboe')) {
         $requirements['tracelytics'] = array(
           'value' => t('Not installed'),
           'severity' => REQUIREMENT_ERROR,
