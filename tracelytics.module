@@ -130,7 +130,7 @@ function tracelytics_watchdog($log_entry) {
       && $log_entry['severity'] <= WATCHDOG_WARNING
       && $log_entry['type'] != 'php') {
     $message = filter_xss(is_null($log_entry['variables']) ? $log_entry['message'] : strtr($log_entry['message'], $log_entry['variables']));
-    oboe_log('info', array('ErrorClass' => $log_entry['type'], 'ErrorMsg' => $message));
+    tracelytics_oboe_log('info', array('ErrorClass' => $log_entry['type'], 'ErrorMsg' => $message));
   }
 }
 
@@ -145,20 +145,20 @@ function tracelytics_exit() {
   // Partition traffic.
   if (variable_get('tracelytics_partition_traffic', FALSE)) {
     if (!empty($_tracelytics_partition)) {
-      oboe_log('info', array('Partition' => $_tracelytics_partition));
+      tracelytics_oboe_log('info', array('Partition' => $_tracelytics_partition));
     }
     else {
       switch ($user->uid) {
         case 1:
-          oboe_log('info', array('Partition' => 'Admin'));
+          tracelytics_oboe_log('info', array('Partition' => 'Admin'));
           break;
 
         case 0:
-          oboe_log('info', array('Partition' => 'Anonymous'));
+          tracelytics_oboe_log('info', array('Partition' => 'Anonymous'));
           break;
 
         default:
-          oboe_log('info', array('Partition' => 'Authenticated'));
+          tracelytics_oboe_log('info', array('Partition' => 'Authenticated'));
           break;
       }
     }
@@ -178,7 +178,7 @@ function tracelytics_exit() {
 
   $controller = tracelytics_set_controller(NULL, FALSE, TRUE);
   if (!empty($controller)) {
-    oboe_log('info', $controller);
+    tracelytics_oboe_log('info', $controller);
   }
 }
 
@@ -215,12 +215,12 @@ function tracelytics_set_controller($controller = NULL, $override = FALSE, $alte
 function tracelytics_cron() {
   // Partition cron traffic.
   if (variable_get('tracelytics_partition_traffic', FALSE)) {
-    oboe_log('info', array('Partition' => 'Cron'));
+    tracelytics_oboe_log('info', array('Partition' => 'Cron'));
   }
 
   // Track active menu item.
   if (variable_get('tracelytics_track_menu', FALSE)) {
-    oboe_log('info',
+    tracelytics_oboe_log('info',
       array(
         'Controller' => 'cron',
         'Action' => NULL,
@@ -283,6 +283,39 @@ function tracelytics_get_action($argument) {
 function tracelytics_set_partition($partition) {
   global $_tracelytics_partition;
   $_tracelytics_partition = $partition;
+}
+
+/**
+ * Wrapper function for oboe_log to support different library versions, which
+ * have different function signatures.
+ *
+ * @param string $param1
+ * @param mixed $param2
+ * @param mixed $param3
+ * @param boolean $backtrace
+ */
+function tracelytics_oboe_log($param1, $param2, $param3 = NULL, $backtrace = NULL) {
+  // By default, log a backtrace for all layer entry calles, unless explicitly
+  // disabled by setting $backtrace to FALSE.
+  if ($backtrace === NULL && $param2 == 'entry') {
+    $backtrace = TRUE;
+  }
+  if (!$backtrace || version_compare(phpversion('oboe'), '1.1.2', '<')) {
+    if ($param3 === NULL) {
+      oboe_log($param1, $param2);
+    }
+    else {
+      oboe_log($param1, $param2, $param3);
+    }
+  }
+  else {
+    if ($param3 === NULL) {
+      oboe_log($param1, $param2, TRUE);
+    }
+    else {
+      oboe_log($param1, $param2, $param3, TRUE);
+    }
+  }
 }
 
 /**

@@ -10,7 +10,7 @@
  */
 function tracelytics_early_boot() {
   if (variable_get('tracelytics_layers', FALSE)) {
-    oboe_log('drupal_hook_boot', 'entry', array());
+    tracelytics_oboe_log('drupal_hook_boot', 'entry', array());
   }
 }
 
@@ -19,7 +19,7 @@ function tracelytics_early_boot() {
  */
 function tracelytics_early_init() {
   if (variable_get('tracelytics_layers', FALSE)) {
-    oboe_log('drupal_hook_init', 'entry', array());
+    tracelytics_oboe_log('drupal_hook_init', 'entry', array());
   }
 }
 
@@ -32,7 +32,7 @@ function tracelytics_early_init() {
  */
 function tracelytics_early_form_alter(&$form, &$form_state, $form_id) {
   if (variable_get('tracelytics_layers', FALSE)) {
-    oboe_log('drupal_hook_form_alter', 'entry', array('Form-ID' => $form_id));
+    tracelytics_oboe_log('drupal_hook_form_alter', 'entry', array('Form-ID' => $form_id));
   }
 }
 
@@ -45,7 +45,7 @@ function tracelytics_early_form_alter(&$form, &$form_state, $form_id) {
  */
 function tracelytics_early_views_pre_view(&$view, &$display_id, &$args) {
   if (variable_get('tracelytics_layers', FALSE)) {
-    oboe_log('drupal_views', 'entry', array('View-Name' => $view->name, 'View-Display-ID' => $display_id));
+    tracelytics_oboe_log('drupal_views', 'entry', array('View-Name' => $view->name, 'View-Display-ID' => $display_id));
   }
 }
 
@@ -57,7 +57,7 @@ function tracelytics_early_views_pre_view(&$view, &$display_id, &$args) {
  */
 function tracelytics_early_panels_pre_render($display, $renderer) {
   if (variable_get('tracelytics_layers', FALSE)) {
-    oboe_log('drupal_panels', 'entry', array('Panel-Renderer' => $display->renderer, 'Panel-Layout' => $display->layout));
+    tracelytics_oboe_log('drupal_panels', 'entry', array('Panel-Renderer' => $display->renderer, 'Panel-Layout' => $display->layout));
   }
 }
 
@@ -71,7 +71,7 @@ function tracelytics_early_panels_pre_render($display, $renderer) {
  */
 function tracelytics_early_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   if ($op == 'load' && variable_get('tracelytics_layers', FALSE)) {
-    oboe_log('drupal_hook_node_load', 'entry', array('Node-NID' => $node->nid, 'Node-Type' => $node->type));
+    tracelytics_oboe_log('drupal_hook_node_load', 'entry', array('Node-NID' => $node->nid, 'Node-Type' => $node->type));
   }
 }
 
@@ -82,7 +82,7 @@ function tracelytics_early_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
  */
 function tracelytics_early_watchdog($log_entry) {
   if (variable_get('tracelytics_layers', FALSE)) {
-    oboe_log('drupal_hook_watchdog', 'entry', array());
+    tracelytics_oboe_log('drupal_hook_watchdog', 'entry', array());
   }
 }
 
@@ -91,7 +91,7 @@ function tracelytics_early_watchdog($log_entry) {
  */
 function tracelytics_early_footer($main = 0) {
   if (variable_get('tracelytics_layers', FALSE)) {
-    oboe_log('drupal_hook_footer', 'entry', array());
+    tracelytics_oboe_log('drupal_hook_footer', 'entry', array());
   }
 }
 
@@ -100,6 +100,6 @@ function tracelytics_early_footer($main = 0) {
  */
 function tracelytics_early_exit() {
   if (variable_get('tracelytics_layers', FALSE)) {
-    oboe_log('drupal_hook_exit', 'entry', array());
+    tracelytics_oboe_log('drupal_hook_exit', 'entry', array());
   }
 }
