@@ -162,27 +162,32 @@ function tracelytics_admin_settings() {
       ),
     ),
   );
-  $form['tracelytics_layers_fieldset']['tracelytics_layers'] = array(
+  $form['tracelytics_layers'] = array(
     '#type' => 'checkbox',
     '#title' => t('Track layers'),
     '#description' => t('Enable tracking of Drupal layers via hooks.'),
     '#default_value' => variable_get('tracelytics_layers', FALSE),
     '#disabled' => !$tracelytics_layers_modules,
   );
-  $form['tracelytics_layers_fieldset']['tracelytics_layers_detail'] = array(
+  $form['tracelytics_layers_fieldset'] = array(
     '#type' => 'fieldset',
     '#title' => 'Detailed layer profiling',
     '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#collapsed' => !variable_get('tracelytics_layers', FALSE),
+    '#states' => array(
+      'expanded' => array(
+        ':input[name="tracelytics_layers"]' => array('checked' => TRUE),
+      ),
+    ),
   );
-  $form['tracelytics_layers_fieldset']['tracelytics_layers_detail']['tracelytics_profile_views'] = array(
+  $form['tracelytics_layers_fieldset']['tracelytics_profile_views'] = array(
     '#type' => 'checkbox',
     '#title' => t('Views'),
     '#description' => t('Enable additional profiling information about Views.'),
     '#default_value' => variable_get('tracelytics_profile_views', FALSE),
     '#disabled' => !($tracelytics_layers_modules && variable_get('tracelytics_layers', FALSE) && module_exists('views')),
   );
-  $form['tracelytics_layers_fieldset']['tracelytics_layers_detail']['tracelytics_profile_panels'] = array(
+  $form['tracelytics_layers_fieldset']['tracelytics_profile_panels'] = array(
     '#type' => 'checkbox',
     '#title' => t('Panels'),
     '#description' => t('Enable additional profiling information about Panels.'),
