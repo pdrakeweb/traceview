@@ -453,6 +453,48 @@ function tracelytics_modules_disabled($modules) {
 }
 
 /**
+ * Implements hook_token_info().
+ *
+ */
+function tracelytics_token_info() {
+  $type = array(
+    'name' => t('TraceView'),
+    'description' => t('Tokens related to TraceView.'),
+    'needs-data' => 'node',
+  );
+  $trace = array(
+    'tid' => array(
+      'name' => t("Trace ID"),
+      'description' => t("The unique ID of the trace."),
+    )
+  );
+  return array(
+    'types' => array('trace' => $type),
+    'tokens' => array(
+      'trace' => $trace,
+    ),
+  );
+}
+
+/**
+ * Implements hook_tokens().
+ */
+function tracelytics_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $sanitize = !empty($options['sanitize']);
+  $replacements = array();
+  if ($type == 'trace') {
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'tid':
+          $replacements[$original] = $sanitize? check_plain(oboe_get_context()) : oboe_get_context();
+          break;
+      }
+    }
+  }
+  return $replacements;
+}
+
+/**
  * Get an action string from an unknown argument type.
  *
  * @param mixed $argument
