@@ -113,13 +113,6 @@ function tracelytics_admin_settings() {
     '#default_value' => variable_get('tracelytics_track_menu', FALSE),
     '#disabled' => !(function_exists('oboe_log') && function_exists('menu_get_item')),
   );
-  $form['tracelytics_log_errors'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Track watchdog'),
-    '#description' => t('Enable tracking of watchdog entries of WATCHDOG_WARNING or greater severity as errors.'),
-    '#default_value' => variable_get('tracelytics_log_errors', FALSE),
-    '#disabled' => !(function_exists('oboe_log')),
-  );
   $form['tracelytics_drupal_http_request'] = array(
     '#type' => 'checkbox',
     '#title' => t('Track drupal_http_request() calls'),
@@ -127,11 +120,47 @@ function tracelytics_admin_settings() {
     '#default_value' => ('tracelytics_drupal_http_request' === variable_get('drupal_http_request_function', FALSE)),
     '#disabled' => version_compare(VERSION, '7.22', '<') || $drupal_http_request_function !== 'tracelytics_drupal_http_request',
   );
-  $form['tracelytics_layers_fieldset'] = array(
+  $form['tracelytics_log_errors'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Track watchdog'),
+    '#description' => t('Enable tracking of watchdog entries of WATCHDOG_WARNING or greater severity as errors.'),
+    '#default_value' => variable_get('tracelytics_log_errors', FALSE),
+    '#disabled' => !(function_exists('oboe_log')),
+  );
+  $form['tracelytics_watchdog_fieldset'] = array(
     '#type' => 'fieldset',
-    '#title' => 'Layers',
+    '#title' => 'Watchdog options',
     '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
+    '#collapsed' => !variable_get('tracelytics_log_errors', FALSE),
+    '#states' => array(
+      'expanded' => array(
+        ':input[name="tracelytics_log_errors"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['tracelytics_watchdog_fieldset']['tracelytics_log_404'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Track 404s'),
+    '#description' => t('Enable tracking of watchdog entries for MENU_NOT_FOUND (404s) as errors.'),
+    '#default_value' => variable_get('tracelytics_log_404', FALSE),
+    '#disabled' => !(function_exists('oboe_log')),
+    '#states' => array(
+      'enabled' => array(
+        ':input[name="tracelytics_log_errors"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['tracelytics_watchdog_fieldset']['tracelytics_log_403'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Track 403s'),
+    '#description' => t('Enable tracking of watchdog entries for MENU_ACCESS_DENIED (403s) as errors.'),
+    '#default_value' => variable_get('tracelytics_log_403', FALSE),
+    '#disabled' => !(function_exists('oboe_log')),
+    '#states' => array(
+      'enabled' => array(
+        ':input[name="tracelytics_log_errors"]' => array('checked' => TRUE),
+      ),
+    ),
   );
   $form['tracelytics_layers_fieldset']['tracelytics_layers'] = array(
     '#type' => 'checkbox',
@@ -245,7 +274,20 @@ function tracelytics_watchdog($log_entry) {
       && $log_entry['severity'] <= WATCHDOG_WARNING
       && $log_entry['type'] != 'php') {
     $message = filter_xss(is_null($log_entry['variables']) ? $log_entry['message'] : strtr($log_entry['message'], $log_entry['variables']));
-    tracelytics_oboe_log('info', array('ErrorClass' => $log_entry['type'], 'ErrorMsg' => $message), TRUE);
+    switch($log_entry['type']) {
+      case 'page not found':
+        if (!variable_get('tracelytics_log_404', FALSE)) {
+          return;
+        }
+        break;
+
+      case 'access denied':
+        if (!variable_get('tracelytics_log_403', FALSE)) {
+          return;
+        }
+        break;
+    }
+    tracelytics_oboe_log('info', array('ErrorClass' => $log_entry['type'], 'ErrorMsg' => $message), NULL, TRUE);
   }
 }
 
