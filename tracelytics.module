@@ -228,7 +228,7 @@ function tracelytics_admin_settings_form_submit($form, &$form_state) {
   $enable = $form_state['values']['tracelytics_drupal_http_request'];
   if (empty($drupal_http_request_function) && $enable) {
     variable_set('drupal_http_request_function', 'tracelytics_drupal_http_request');
-  } 
+  }
   elseif ($drupal_http_request_function === 'tracelytics_drupal_http_request' && !$enable) {
     variable_del('drupal_http_request_function');
   }
@@ -370,12 +370,12 @@ function tracelytics_cron() {
 
 /**
  * Implements hook_batch_alter().
- * 
+ *
  * @param array $batch
  */
 function tracelytics_batch_alter($batch) {
   $current_batch = $batch['sets'][0];
-  if ($current_batch['file'] == 'includes/update.inc' && variable_get('tracelytics_annotate_modules', FALSE)) {
+  if (isset($current_batch['file']) && $current_batch['file'] == 'includes/update.inc' && variable_get('tracelytics_annotate_modules', FALSE)) {
     $update_count = count($current_batch['operations']);
     tracelytics_add_annotation('Module updates run (' . $update_count . ' updates).');
   }
@@ -467,7 +467,7 @@ function tracelytics_set_partition($partition = NULL) {
 /**
  * Wrapper function for oboe_log to support different library versions, which
  * have different function signatures.
- * 
+ *
  * @param string $param1
  * @param mixed $param2
  * @param mixed $param3
