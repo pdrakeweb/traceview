@@ -1,0 +1,6 @@
+name = TraceView Services
+description = Provide integration for tracking Services in AppNeta TraceView.
+core = 7.x
+package = TraceView
+dependencies[] = traceview
+dependencies[] = services

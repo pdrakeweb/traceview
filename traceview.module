@@ -2,16 +2,16 @@
 
 /**
  * @file
- * Module file for tracelytics module
+ * Module file for traceview module
  */
 
 /**
  * Implements hook_init().
  *
- * Include tracelytics RUM javascripts if enabled.
+ * Include traceview RUM javascripts if enabled.
  */
-function tracelytics_init() {
-  if (variable_get('tracelytics_rum', FALSE)) {
+function traceview_init() {
+  if (variable_get('traceview_rum', FALSE)) {
     drupal_add_js(oboe_get_rum_header(FALSE),
       array(
         'type' => 'inline',
@@ -38,13 +38,13 @@ function tracelytics_init() {
 /**
  * Implements hook_menu().
  */
-function tracelytics_menu() {
-  $items['admin/config/system/tracelytics'] = array(
-    'title' => 'Tracelytics',
-    'description' => 'Configure the settings used for tracelytics (oboe).',
+function traceview_menu() {
+  $items['admin/config/system/traceview'] = array(
+    'title' => 'TraceView',
+    'description' => 'Configure the settings used for traceview (oboe).',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('tracelytics_admin_settings'),
-    'access arguments' => array('administer tracelytics'),
+    'page arguments' => array('traceview_admin_settings'),
+    'access arguments' => array('administer traceview'),
     'type' => MENU_NORMAL_ITEM,
   );
   return $items;
@@ -53,11 +53,11 @@ function tracelytics_menu() {
 /**
  * Implements hook_perm().
  */
-function tracelytics_permission() {
+function traceview_permission() {
   return array(
-    'administer tracelytics' => array(
-      'title' => t('Administer tracelytics'),
-      'description' => t('Configure settings for the tracelytics module.'),
+    'administer traceview' => array(
+      'title' => t('Administer traceview'),
+      'description' => t('Configure settings for the traceview module.'),
     ),
   );
 }
@@ -65,191 +65,191 @@ function tracelytics_permission() {
 /**
  * Implements hook_admin_settings().
  *
- * Provide administrative options to enable/disable tracelytics functionality.
+ * Provide administrative options to enable/disable traceview functionality.
  */
-function tracelytics_admin_settings() {
+function traceview_admin_settings() {
   global $conf;
 
   if (!(extension_loaded('oboe'))) {
     drupal_set_message(t('Required Oboe PHP extension is not installed.'), 'error');
   }
 
-  if (isset($conf['tracelytics_fail_silently']) && $conf['tracelytics_fail_silently'] === FALSE) {
-    drupal_set_message(t('The tracelytics module is not configured to fail silently.  Removal of the php-oboe extension may cause fatal errors.'), 'warning');
+  if (isset($conf['traceview_fail_silently']) && $conf['traceview_fail_silently'] === FALSE) {
+    drupal_set_message(t('The traceview module is not configured to fail silently.  Removal of the php-oboe extension may cause fatal errors.'), 'warning');
   }
 
-  if (!($tracelytics_layers_modules = module_exists('tracelytics_early') && module_exists('tracelytics_late'))) {
-    drupal_set_message(t('tracelytics_early and tracelytics_late must be installed in order to track layers.'), 'warning');
+  if (!($traceview_layers_modules = module_exists('traceview_early') && module_exists('traceview_late'))) {
+    drupal_set_message(t('traceview_early and traceview_late must be installed in order to track layers.'), 'warning');
   }
 
-  if (variable_get('tracelytics_partition_drush_traffic', FALSE) || variable_get('tracelytics_track_drush_commands', FALSE)) {
+  if (variable_get('traceview_partition_drush_traffic', FALSE) || variable_get('traceview_track_drush_commands', FALSE)) {
     drupal_set_message(t('oboe.tracing must be configured to "always" for PHP CLI in order to trace drush commands.'), 'notice');
   }
 
-  $drupal_http_request_function = variable_get('drupal_http_request_function', 'tracelytics_drupal_http_request');
-  if ($drupal_http_request_function !== 'tracelytics_drupal_http_request') {
+  $drupal_http_request_function = variable_get('drupal_http_request_function', 'traceview_drupal_http_request');
+  if ($drupal_http_request_function !== 'traceview_drupal_http_request') {
     drupal_set_message(t('Overriding the drupal_http_request_function variable is required in order to trace drupal_http_request calls. The variable has already been overridden (@function), possibly by another module.', array('@function' => $drupal_http_request_function)), 'warning');
   }
 
   $form = array();
-  $form['tracelytics_partition_traffic'] = array(
+  $form['traceview_partition_traffic'] = array(
     '#type' => 'checkbox',
     '#title' => t('Partition traffic'),
     '#description' => t('Enable partitioning of traffic into drush, cron, anonymous and authenticated.'),
-    '#default_value' => variable_get('tracelytics_partition_traffic', FALSE),
+    '#default_value' => variable_get('traceview_partition_traffic', FALSE),
     '#disabled' => !(function_exists('oboe_log')),
   );
-  $form['tracelytics_rum'] = array(
+  $form['traceview_rum'] = array(
     '#type' => 'checkbox',
     '#title' => t('Track RUM'),
     '#description' => t('Enable tracking of Real User Monitoring data via javascript.'),
-    '#default_value' => variable_get('tracelytics_rum', FALSE),
+    '#default_value' => variable_get('traceview_rum', FALSE),
     '#disabled' => !(function_exists('oboe_get_rum_header')),
   );
-  $form['tracelytics_track_menu'] = array(
+  $form['traceview_track_menu'] = array(
     '#type' => 'checkbox',
     '#title' => t('Track active menu items'),
     '#description' => t('Enable tracking of the active menu item and first argument as Controller/Action.'),
-    '#default_value' => variable_get('tracelytics_track_menu', FALSE),
+    '#default_value' => variable_get('traceview_track_menu', FALSE),
     '#disabled' => !(function_exists('oboe_log') && function_exists('menu_get_item')),
   );
-  $form['tracelytics_drupal_http_request'] = array(
+  $form['traceview_drupal_http_request'] = array(
     '#type' => 'checkbox',
     '#title' => t('Track drupal_http_request() calls'),
     '#description' => t('Enable tracking of drupal_http_request calls.  This requires Drupal 7.22 or above (see http://drupal.org/drupal-7.22-release-notes).'),
-    '#default_value' => ('tracelytics_drupal_http_request' === variable_get('drupal_http_request_function', FALSE)),
-    '#disabled' => version_compare(VERSION, '7.22', '<') || $drupal_http_request_function !== 'tracelytics_drupal_http_request',
+    '#default_value' => ('traceview_drupal_http_request' === variable_get('drupal_http_request_function', FALSE)),
+    '#disabled' => version_compare(VERSION, '7.22', '<') || $drupal_http_request_function !== 'traceview_drupal_http_request',
   );
-  $form['tracelytics_log_errors'] = array(
+  $form['traceview_log_errors'] = array(
     '#type' => 'checkbox',
     '#title' => t('Track watchdog'),
     '#description' => t('Enable tracking of watchdog entries of WATCHDOG_WARNING or greater severity as errors.'),
-    '#default_value' => variable_get('tracelytics_log_errors', FALSE),
+    '#default_value' => variable_get('traceview_log_errors', FALSE),
     '#disabled' => !(function_exists('oboe_log')),
   );
-  $form['tracelytics_watchdog_fieldset'] = array(
+  $form['traceview_watchdog_fieldset'] = array(
     '#type' => 'fieldset',
     '#title' => 'Watchdog options',
     '#collapsible' => TRUE,
-    '#collapsed' => !variable_get('tracelytics_log_errors', FALSE),
+    '#collapsed' => !variable_get('traceview_log_errors', FALSE),
     '#states' => array(
       'expanded' => array(
-        ':input[name="tracelytics_log_errors"]' => array('checked' => TRUE),
+        ':input[name="traceview_log_errors"]' => array('checked' => TRUE),
       ),
     ),
   );
-  $form['tracelytics_watchdog_fieldset']['tracelytics_log_404'] = array(
+  $form['traceview_watchdog_fieldset']['traceview_log_404'] = array(
     '#type' => 'checkbox',
     '#title' => t('Track 404s'),
     '#description' => t('Enable tracking of watchdog entries for MENU_NOT_FOUND (404s) as errors.'),
-    '#default_value' => variable_get('tracelytics_log_404', FALSE),
+    '#default_value' => variable_get('traceview_log_404', FALSE),
     '#disabled' => !(function_exists('oboe_log')),
     '#states' => array(
       'enabled' => array(
-        ':input[name="tracelytics_log_errors"]' => array('checked' => TRUE),
+        ':input[name="traceview_log_errors"]' => array('checked' => TRUE),
       ),
     ),
   );
-  $form['tracelytics_watchdog_fieldset']['tracelytics_log_403'] = array(
+  $form['traceview_watchdog_fieldset']['traceview_log_403'] = array(
     '#type' => 'checkbox',
     '#title' => t('Track 403s'),
     '#description' => t('Enable tracking of watchdog entries for MENU_ACCESS_DENIED (403s) as errors.'),
-    '#default_value' => variable_get('tracelytics_log_403', FALSE),
+    '#default_value' => variable_get('traceview_log_403', FALSE),
     '#disabled' => !(function_exists('oboe_log')),
     '#states' => array(
       'enabled' => array(
-        ':input[name="tracelytics_log_errors"]' => array('checked' => TRUE),
+        ':input[name="traceview_log_errors"]' => array('checked' => TRUE),
       ),
     ),
   );
-  $form['tracelytics_layers'] = array(
+  $form['traceview_layers'] = array(
     '#type' => 'checkbox',
     '#title' => t('Track layers'),
     '#description' => t('Enable tracking of Drupal layers via hooks.'),
-    '#default_value' => variable_get('tracelytics_layers', FALSE),
-    '#disabled' => !$tracelytics_layers_modules,
+    '#default_value' => variable_get('traceview_layers', FALSE),
+    '#disabled' => !$traceview_layers_modules,
   );
-  $form['tracelytics_layers_fieldset'] = array(
+  $form['traceview_layers_fieldset'] = array(
     '#type' => 'fieldset',
     '#title' => 'Detailed layer profiling',
     '#collapsible' => TRUE,
-    '#collapsed' => !variable_get('tracelytics_layers', FALSE),
+    '#collapsed' => !variable_get('traceview_layers', FALSE),
     '#states' => array(
       'expanded' => array(
-        ':input[name="tracelytics_layers"]' => array('checked' => TRUE),
+        ':input[name="traceview_layers"]' => array('checked' => TRUE),
       ),
     ),
   );
-  $form['tracelytics_layers_fieldset']['tracelytics_profile_views'] = array(
+  $form['traceview_layers_fieldset']['traceview_profile_views'] = array(
     '#type' => 'checkbox',
     '#title' => t('Views'),
     '#description' => t('Enable additional profiling information about Views.'),
-    '#default_value' => variable_get('tracelytics_profile_views', FALSE),
-    '#disabled' => !($tracelytics_layers_modules && variable_get('tracelytics_layers', FALSE) && module_exists('views')),
+    '#default_value' => variable_get('traceview_profile_views', FALSE),
+    '#disabled' => !($traceview_layers_modules && variable_get('traceview_layers', FALSE) && module_exists('views')),
   );
-  $form['tracelytics_layers_fieldset']['tracelytics_profile_panels'] = array(
+  $form['traceview_layers_fieldset']['traceview_profile_panels'] = array(
     '#type' => 'checkbox',
     '#title' => t('Panels'),
     '#description' => t('Enable additional profiling information about Panels.'),
-    '#default_value' => variable_get('tracelytics_profile_panels', FALSE),
-    '#disabled' => !($tracelytics_layers_modules && variable_get('tracelytics_layers', FALSE) && module_exists('panels')),
+    '#default_value' => variable_get('traceview_profile_panels', FALSE),
+    '#disabled' => !($traceview_layers_modules && variable_get('traceview_layers', FALSE) && module_exists('panels')),
   );
-  $form['tracelytics_api'] = array(
+  $form['traceview_api'] = array(
     '#type' => 'fieldset',
     '#title' => 'TraceView API',
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
-  $form['tracelytics_api']['tracelytics_key'] = array(
+  $form['traceview_api']['traceview_key'] = array(
     '#type' => 'textfield',
     '#title' => t('TraceView client key'),
     '#description' => t("To enable calls to the TraceView API, provide your client key (e.g., 'abcd1234-1234-1234-aaaa-123412341234'). It can be found on the 'Install Host Agent' tab of the 'Get Started' page."),
-    '#default_value' => variable_get('tracelytics_key', ''),
+    '#default_value' => variable_get('traceview_key', ''),
   );
-  $form['tracelytics_api']['annotations'] = array(
+  $form['traceview_api']['annotations'] = array(
     '#type' => 'fieldset',
     '#title' => 'Annotations',
-    '#description' => t('If a client key has been provided, the `tracelytics_add_annotation` function can be used to add annotations in TraceView directly from your Drupal site. This function requires a string argument to be associated with the annotation, but it will also accept a second array argument using the key-value pairs detailed in the !link.', array('!link' => l(t('TraceView API documentation'), 'http://support.tv.appneta.com/kb/how-to/recording-system-events-with-tlog#api'))),
+    '#description' => t('If a client key has been provided, the `traceview_add_annotation` function can be used to add annotations in TraceView directly from your Drupal site. This function requires a string argument to be associated with the annotation, but it will also accept a second array argument using the key-value pairs detailed in the !link.', array('!link' => l(t('TraceView API documentation'), 'http://support.tv.appneta.com/kb/how-to/recording-system-events-with-tlog#api'))),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
-  $form['tracelytics_api']['annotations']['tracelytics_annotation_appname'] = array(
+  $form['traceview_api']['annotations']['traceview_annotation_appname'] = array(
     '#type' => 'textfield',
     '#title' => t('Default application'),
-    '#description' => t("Provide the application that annotations should be associated with (typically, the application you've placed this Drupal installation in). This can be overriden on each call to `tracelytics_add_annotation`. If not provided, annotations will not be limited by application."),
-    '#default_value' => variable_get('tracelytics_annotation_appname', ''),
+    '#description' => t("Provide the application that annotations should be associated with (typically, the application you've placed this Drupal installation in). This can be overriden on each call to `traceview_add_annotation`. If not provided, annotations will not be limited by application."),
+    '#default_value' => variable_get('traceview_annotation_appname', ''),
   );
-  $form['tracelytics_api']['annotations']['tracelytics_annotation_username'] = array(
+  $form['traceview_api']['annotations']['traceview_annotation_username'] = array(
     '#type' => 'textfield',
     '#title' => t('Default username'),
-    '#description' => t("Provide the username that annotations should be associated with. This can be overriden on each call to `tracelytics_add_annotation`. If not provided, this will default to the site name, or 'Drupal' if no site name is set."),
-    '#default_value' => variable_get('tracelytics_annotation_username', ''),
+    '#description' => t("Provide the username that annotations should be associated with. This can be overriden on each call to `traceview_add_annotation`. If not provided, this will default to the site name, or 'Drupal' if no site name is set."),
+    '#default_value' => variable_get('traceview_annotation_username', ''),
   );
-  $form['tracelytics_api']['annotations']['tracelytics_annotate_modules'] = array(
+  $form['traceview_api']['annotations']['traceview_annotate_modules'] = array(
     '#type' => 'checkbox',
     '#title' => t('Annotate module changes'),
     '#description' => t('Record an annotation when modules are enabled/disabled or module updates are run.'),
-    '#default_value' => variable_get('tracelytics_annotate_modules', FALSE),
+    '#default_value' => variable_get('traceview_annotate_modules', FALSE),
   );
-  $form['tracelytics_drush'] = array(
+  $form['traceview_drush'] = array(
     '#type' => 'fieldset',
     '#title' => 'Drush integration',
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
-  $form['tracelytics_drush']['tracelytics_partition_drush_traffic'] = array(
+  $form['traceview_drush']['traceview_partition_drush_traffic'] = array(
     '#type' => 'checkbox',
     '#title' => t('Partition traffic'),
     '#description' => t('Enable partitioning of traffic into drush, cron, anonymous and authenticated.'),
-    '#default_value' => variable_get('tracelytics_partition_drush_traffic', FALSE),
+    '#default_value' => variable_get('traceview_partition_drush_traffic', FALSE),
   );
-  $form['tracelytics_drush']['tracelytics_track_drush_commands'] = array(
+  $form['traceview_drush']['traceview_track_drush_commands'] = array(
     '#type' => 'checkbox',
     '#title' => t('Track active menu items'),
     '#description' => t('Enable tracking of the active menu item and first argument as Controller/Action.'),
-    '#default_value' => variable_get('tracelytics_track_drush_commands', FALSE),
+    '#default_value' => variable_get('traceview_track_drush_commands', FALSE),
   );
-  $form['#submit'][] = 'tracelytics_admin_settings_form_submit';
+  $form['#submit'][] = 'traceview_admin_settings_form_submit';
   return system_settings_form($form);
 }
 
@@ -257,83 +257,83 @@ function tracelytics_admin_settings() {
  * Implements hook_form_submit().
  *
  */
-function tracelytics_admin_settings_form_submit($form, &$form_state) {
+function traceview_admin_settings_form_submit($form, &$form_state) {
   $drupal_http_request_function = variable_get('drupal_http_request_function');
-  $enable = $form_state['values']['tracelytics_drupal_http_request'];
+  $enable = $form_state['values']['traceview_drupal_http_request'];
   if (empty($drupal_http_request_function) && $enable) {
-    variable_set('drupal_http_request_function', 'tracelytics_drupal_http_request');
+    variable_set('drupal_http_request_function', 'traceview_drupal_http_request');
   }
-  elseif ($drupal_http_request_function === 'tracelytics_drupal_http_request' && !$enable) {
+  elseif ($drupal_http_request_function === 'traceview_drupal_http_request' && !$enable) {
     variable_del('drupal_http_request_function');
   }
-  unset($form_state['values']['tracelytics_drupal_http_request']);
+  unset($form_state['values']['traceview_drupal_http_request']);
 }
 
 /**
  * Implements hook_watchdog().
  *
- * Record errors to tracelytics.
+ * Record errors to traceview.
  */
-function tracelytics_watchdog($log_entry) {
-  if (variable_get('tracelytics_log_errors', FALSE)
+function traceview_watchdog($log_entry) {
+  if (variable_get('traceview_log_errors', FALSE)
       && $log_entry['severity'] <= WATCHDOG_WARNING
       && $log_entry['type'] != 'php') {
     $message = filter_xss(is_null($log_entry['variables']) ? $log_entry['message'] : strtr($log_entry['message'], $log_entry['variables']));
     switch($log_entry['type']) {
       case 'page not found':
-        if (!variable_get('tracelytics_log_404', FALSE)) {
+        if (!variable_get('traceview_log_404', FALSE)) {
           return;
         }
         break;
 
       case 'access denied':
-        if (!variable_get('tracelytics_log_403', FALSE)) {
+        if (!variable_get('traceview_log_403', FALSE)) {
           return;
         }
         break;
     }
-    tracelytics_oboe_log('info', array('ErrorClass' => $log_entry['type'], 'ErrorMsg' => $message), NULL, TRUE);
+    traceview_oboe_log('info', array('ErrorClass' => $log_entry['type'], 'ErrorMsg' => $message), NULL, TRUE);
   }
 }
 
 /**
  * Implements hook_exit().
  *
- * Record tracelytics traffic partitioning and controller.
+ * Record traceview traffic partitioning and controller.
  */
-function tracelytics_exit() {
+function traceview_exit() {
   global $user;
 
   // Partition traffic.
-  if (variable_get('tracelytics_partition_traffic', FALSE)) {
-    $tracelytics_partition = tracelytics_set_partition();
-    if (!empty($tracelytics_partition)) {
-      tracelytics_oboe_log('info', array('Partition' => $tracelytics_partition));
+  if (variable_get('traceview_partition_traffic', FALSE)) {
+    $traceview_partition = traceview_set_partition();
+    if (!empty($traceview_partition)) {
+      traceview_oboe_log('info', array('Partition' => $traceview_partition));
     }
     else {
       switch ($user->uid) {
         case 1:
-          tracelytics_oboe_log('info', array('Partition' => 'Admin'));
+          traceview_oboe_log('info', array('Partition' => 'Admin'));
           break;
 
         case 0:
-          tracelytics_oboe_log('info', array('Partition' => 'Anonymous'));
+          traceview_oboe_log('info', array('Partition' => 'Anonymous'));
           break;
 
         default:
-          tracelytics_oboe_log('info', array('Partition' => 'Authenticated'));
+          traceview_oboe_log('info', array('Partition' => 'Authenticated'));
           break;
       }
     }
   }
 
   // Track active menu item.
-  if (variable_get('tracelytics_track_menu', FALSE)) {
+  if (variable_get('traceview_track_menu', FALSE)) {
     // Report the menu entry if we can determine the proper one.
     if (function_exists('menu_get_item')  && $router_item = menu_get_item()) {
       $controller = array(
         'Controller' => $router_item['page_callback'],
-        'Action' => (isset($router_item['page_arguments'][0]) ? tracelytics_get_action($router_item['page_arguments'][0]) : 'NULL'),
+        'Action' => (isset($router_item['page_arguments'][0]) ? traceview_get_action($router_item['page_arguments'][0]) : 'NULL'),
       );
     }
     // Else, report if the page is retrieved from cache.
@@ -360,20 +360,20 @@ function tracelytics_exit() {
         'Action' => $phase_names[drupal_get_bootstrap_phase()],
       );
     }
-    tracelytics_set_controller($controller);
+    traceview_set_controller($controller);
   }
 
-  $controller = tracelytics_set_controller(NULL, FALSE, TRUE);
+  $controller = traceview_set_controller(NULL, FALSE, TRUE);
   if (!empty($controller)) {
-    tracelytics_oboe_log('info', $controller);
+    traceview_oboe_log('info', $controller);
   }
 }
 
 /**
- * Set the controller to be reported to tracelytics.
+ * Set the controller to be reported to traceview.
  *
  * @param array $controller
- *   The controller array to be reported to tracelytics.
+ *   The controller array to be reported to traceview.
  * @param bool $override
  *   Flag to indicate whether the passed controller should override previously
  *   set controller array.
@@ -381,37 +381,37 @@ function tracelytics_exit() {
  *   Flag to indicate whether to call hook_alter on the controller array.
  *
  * @return array
- *   The controller array to be reported to tracelytics.
+ *   The controller array to be reported to traceview.
  */
-function tracelytics_set_controller($controller = NULL, $override = FALSE, $alter = FALSE) {
-  static $tracelytics_controller = array();
-  if (!empty($controller) && ($override || empty($tracelytics_controller))) {
-    $tracelytics_controller = $controller;
+function traceview_set_controller($controller = NULL, $override = FALSE, $alter = FALSE) {
+  static $traceview_controller = array();
+  if (!empty($controller) && ($override || empty($traceview_controller))) {
+    $traceview_controller = $controller;
   }
   if (function_exists('drupal_alter') && $alter) {
-    drupal_alter('tracelytics_controller', $tracelytics_controller);
+    drupal_alter('traceview_controller', $traceview_controller);
   }
-  return $tracelytics_controller;
+  return $traceview_controller;
 }
 
 /**
  * Implements hook_cron().
  *
- * Record tracelytics traffic partitioning and controller within cron.
+ * Record traceview traffic partitioning and controller within cron.
  */
-function tracelytics_cron() {
+function traceview_cron() {
   // Partition cron traffic.
-  if (variable_get('tracelytics_partition_traffic', FALSE)) {
-    tracelytics_set_partition('Cron');
+  if (variable_get('traceview_partition_traffic', FALSE)) {
+    traceview_set_partition('Cron');
   }
 
   // Track active menu item.
-  if (variable_get('tracelytics_track_menu', FALSE)) {
+  if (variable_get('traceview_track_menu', FALSE)) {
     $controller = array(
       'Controller' => 'cron',
       'Action' => NULL,
     );
-    tracelytics_set_controller($controller, TRUE);
+    traceview_set_controller($controller, TRUE);
   }
 }
 
@@ -420,11 +420,11 @@ function tracelytics_cron() {
  *
  * @param array $batch
  */
-function tracelytics_batch_alter($batch) {
+function traceview_batch_alter($batch) {
   $current_batch = $batch['sets'][0];
-  if (isset($current_batch['file']) && $current_batch['file'] == 'includes/update.inc' && variable_get('tracelytics_annotate_modules', FALSE)) {
+  if (isset($current_batch['file']) && $current_batch['file'] == 'includes/update.inc' && variable_get('traceview_annotate_modules', FALSE)) {
     $update_count = count($current_batch['operations']);
-    tracelytics_add_annotation('Module updates run (' . $update_count . ' updates).');
+    traceview_add_annotation('Module updates run (' . $update_count . ' updates).');
   }
 }
 
@@ -433,10 +433,10 @@ function tracelytics_batch_alter($batch) {
  *
  * @param array $modules
  */
-function tracelytics_modules_enabled($modules) {
-  if (variable_get('tracelytics_annotate_modules', FALSE)) {
+function traceview_modules_enabled($modules) {
+  if (variable_get('traceview_annotate_modules', FALSE)) {
     $enabled_count = count($modules);
-    tracelytics_add_annotation($enabled_count . ' module(s) enabled (' . implode(', ', $modules) . ').');
+    traceview_add_annotation($enabled_count . ' module(s) enabled (' . implode(', ', $modules) . ').');
   }
 }
 
@@ -445,10 +445,10 @@ function tracelytics_modules_enabled($modules) {
  *
  * @param array $modules
  */
-function tracelytics_modules_disabled($modules) {
-  if (variable_get('tracelytics_annotate_modules', FALSE)) {
+function traceview_modules_disabled($modules) {
+  if (variable_get('traceview_annotate_modules', FALSE)) {
     $enabled_count = count($modules);
-    tracelytics_add_annotation($enabled_count . ' module(s) disabled (' . implode(', ', $modules) . ').');
+    traceview_add_annotation($enabled_count . ' module(s) disabled (' . implode(', ', $modules) . ').');
   }
 }
 
@@ -456,7 +456,7 @@ function tracelytics_modules_disabled($modules) {
  * Implements hook_token_info().
  *
  */
-function tracelytics_token_info() {
+function traceview_token_info() {
   $type = array(
     'name' => t('TraceView'),
     'description' => t('Tokens related to TraceView.'),
@@ -479,7 +479,7 @@ function tracelytics_token_info() {
 /**
  * Implements hook_tokens().
  */
-function tracelytics_tokens($type, $tokens, array $data = array(), array $options = array()) {
+function traceview_tokens($type, $tokens, array $data = array(), array $options = array()) {
   $sanitize = !empty($options['sanitize']);
   $replacements = array();
   if ($type == 'trace') {
@@ -503,7 +503,7 @@ function tracelytics_tokens($type, $tokens, array $data = array(), array $option
  * @return string
  *   Description (or string conversion) of $argument.
  */
-function tracelytics_get_action($argument) {
+function traceview_get_action($argument) {
   switch (gettype($argument)) {
     case 'integer':
     case 'double':
@@ -540,17 +540,17 @@ function tracelytics_get_action($argument) {
 }
 
 /**
- * Set the tracelytics partition.
+ * Set the traceview partition.
  *
  * @param string $partition
  *   Traffic partition name.
  */
-function tracelytics_set_partition($partition = NULL) {
-  static $tracelytics_partition;
+function traceview_set_partition($partition = NULL) {
+  static $traceview_partition;
   if (!empty($partition)) {
-    $tracelytics_partition = $partition;
+    $traceview_partition = $partition;
   }
-  return $tracelytics_partition;
+  return $traceview_partition;
 }
 
 /**
@@ -562,7 +562,7 @@ function tracelytics_set_partition($partition = NULL) {
  * @param mixed $param3
  * @param boolean $backtrace
  */
-function tracelytics_oboe_log($param1, $param2, $param3 = NULL, $backtrace = NULL) {
+function traceview_oboe_log($param1, $param2, $param3 = NULL, $backtrace = NULL) {
   // By default, log a backtrace for all layer entry calles, unless explicitly
   // disabled by setting $backtrace to FALSE.
   if ($backtrace === NULL && $param2 == 'entry') {
@@ -598,15 +598,15 @@ function tracelytics_oboe_log($param1, $param2, $param3 = NULL, $backtrace = NUL
  * @return boolean
  *   Indicates whether the API call was successful.
  */
-function tracelytics_add_annotation($message, $params = array()) {
+function traceview_add_annotation($message, $params = array()) {
   $url = 'https://api.tv.appneta.com/api-v1/log_message';
 
   $default_params = array(
-    'key' => variable_get('tracelytics_key', FALSE),
+    'key' => variable_get('traceview_key', FALSE),
     'time' => REQUEST_TIME,
-    'appname' => variable_get('tracelytics_annotation_appname', FALSE),
+    'appname' => variable_get('traceview_annotation_appname', FALSE),
     'hostname' => gethostname(),
-    'username' => variable_get('tracelytics_annotation_username', variable_get('site_name', 'Drupal')),
+    'username' => variable_get('traceview_annotation_username', variable_get('site_name', 'Drupal')),
     'layer' => 'PHP',
   );
 
@@ -614,7 +614,7 @@ function tracelytics_add_annotation($message, $params = array()) {
   $params['message'] = $message;
 
   if (empty($params['key'])) {
-    watchdog('tracelytics', "Failed to add TraceView annotation '%annotation': no TraceView client key has been set.", array('%annotation' => $message), WATCHDOG_ERROR);
+    watchdog('traceview', "Failed to add TraceView annotation '%annotation': no TraceView client key has been set.", array('%annotation' => $message), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -628,7 +628,7 @@ function tracelytics_add_annotation($message, $params = array()) {
   $result = drupal_http_request($url, $http_options);
 
   if (!empty($result->error)) {
-    watchdog('tracelytics', "Failed to add TraceView annotation '%annotation': error message '%error'.", array('%annotation' => $message, '%error' => $result->error), WATCHDOG_ERROR);
+    watchdog('traceview', "Failed to add TraceView annotation '%annotation': error message '%error'.", array('%annotation' => $message, '%error' => $result->error), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -645,7 +645,7 @@ function tracelytics_add_annotation($message, $params = array()) {
  * @param array $options
  *   (optional) An array with options as per drupal_http_request().
  */
-function tracelytics_drupal_http_request($url, array $options = array()) {
+function traceview_drupal_http_request($url, array $options = array()) {
   global $conf;
 
   // Parse the URL for information about the query being made.
@@ -661,7 +661,7 @@ function tracelytics_drupal_http_request($url, array $options = array()) {
   $service_arg .= isset($uri['query']) ? $uri['query'] : '';
 
   // Start the drupal_http_request layer (with a backtrace).
-  tracelytics_oboe_log('drupal_http_request', 'entry', array(
+  traceview_oboe_log('drupal_http_request', 'entry', array(
     'IsService' => 'True',
     'RemoteProtocol' => $uri['scheme'],
     'RemoteController' => 'drupal_http_request',
@@ -679,10 +679,10 @@ function tracelytics_drupal_http_request($url, array $options = array()) {
   $response = drupal_http_request($url, $options);
 
   // Put the override back in place.
-  $conf['drupal_http_request_function'] = 'tracelytics_drupal_http_request';
+  $conf['drupal_http_request_function'] = 'traceview_drupal_http_request';
 
   // Stop the drupal_http_request layer.
-  tracelytics_oboe_log('drupal_http_request', 'exit', array('ResponseCode' => $response->code));
+  traceview_oboe_log('drupal_http_request', 'exit', array('ResponseCode' => $response->code));
 
   return $response;
 }
@@ -692,11 +692,11 @@ function tracelytics_drupal_http_request($url, array $options = array()) {
  * not be available during a given application execution, such as during the
  * execution of a drush command, on a singler server in a cluster or on a non-
  * production environment, the following code will optionally define the
- * missing functions as empty functions provided the tracelytics_fail_silently
+ * missing functions as empty functions provided the traceview_fail_silently
  * configuration setting is not empty.
  */
 global $conf;
-if (!isset($conf['tracelytics_fail_silently']) || $conf['tracelytics_fail_silently'] !== FALSE) {
+if (!isset($conf['traceview_fail_silently']) || $conf['traceview_fail_silently'] !== FALSE) {
   if (!function_exists('oboe_log')) {
     // These functions intentionally left empty.
     function oboe_log() {}
