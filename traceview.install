@@ -45,11 +45,10 @@ function traceview_install() {
     $traceview_submodules = array();
     foreach ($tracelytics_submodules as $tracelytics_module => $traceview_module) {
       if (module_exists($tracelytics_module)) {
-        module_disable(array($tracelytics_module));
         $traceview_submodules[] = $traceview_module;
       }
     }
-    module_disable(array('tracelytics'));
+    module_disable(array('tracelytics'), TRUE);
     drupal_uninstall_modules(array('tracelytics'), TRUE);
     module_enable($traceview_submodules, TRUE);
   }
