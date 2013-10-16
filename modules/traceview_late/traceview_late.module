@@ -1,0 +1,105 @@
+<?php
+
+/**
+ * @file
+ * Module file for traceview_late module
+ */
+
+/**
+ * Implements hook_boot().
+ */
+function traceview_late_boot() {
+  if (variable_get('traceview_layers', FALSE)) {
+    traceview_oboe_log('drupal_hook_boot', 'exit', array());
+  }
+}
+
+/**
+ * Implements hook_init().
+ */
+function traceview_late_init() {
+  if (variable_get('traceview_layers', FALSE)) {
+    traceview_oboe_log('drupal_hook_init', 'exit', array());
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * @param array $form
+ * @param array $form_state
+ * @param string $form_id
+ */
+function traceview_late_form_alter(&$form, &$form_state, $form_id) {
+  if (variable_get('traceview_layers', FALSE)) {
+    traceview_oboe_log('drupal_hook_form_alter', 'exit', array());
+  }
+}
+
+/**
+ * Implements hook_views_post_render().
+ *
+ * @param object $view
+ * @param string $output
+ * @param object $cache
+ */
+function traceview_late_views_post_render(&$view, &$output, &$cache) {
+  if (variable_get('traceview_layers', FALSE)) {
+    traceview_oboe_log('drupal_views', 'exit', array());
+  }
+}
+
+/**
+ * Implements hook_panels_post_render().
+ *
+ * @param object $display
+ * @param object $renderer
+ */
+function traceview_late_panels_post_render($display, $renderer) {
+  if (variable_get('traceview_layers', FALSE)) {
+    traceview_oboe_log('drupal_panels', 'exit', array('Panel-Renderer' => $display->renderer, 'Panel-Layout' => $display->layout));
+  }
+}
+
+/**
+ * Implements hook_nodeapi().
+ *
+ * @param object $node
+ * @param string $op
+ * @param array $a3
+ * @param array $a4
+ */
+function traceview_late_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op == 'load' && variable_get('traceview_layers', FALSE)) {
+    traceview_oboe_log('drupal_hook_node_load', 'exit', array());
+  }
+}
+
+/**
+ * Implements hook_watchdog().
+ *
+ * @param array $log_entry
+ */
+function traceview_late_watchdog($log_entry) {
+  if (variable_get('traceview_layers', FALSE)) {
+    traceview_oboe_log('drupal_hook_watchdog', 'exit', array());
+  }
+}
+
+/**
+ * Implements hook_footer().
+ */
+function traceview_late_footer($main = 0) {
+  if (variable_get('traceview_layers', FALSE)) {
+    traceview_oboe_log('drupal_hook_footer', 'exit', array());
+  }
+}
+
+/**
+ * Implements hook_exit().
+ */
+function traceview_late_exit() {
+  if (variable_get('traceview_layers', FALSE)) {
+    traceview_oboe_log('drupal_hook_exit', 'exit', array());
+  }
+}

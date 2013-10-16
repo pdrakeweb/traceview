@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * traceview_late module install file
+ */
+
+/**
+ * Implements hook_install().
+ */
+function traceview_late_install() {
+  db_query('UPDATE {system} SET weight = 10000 WHERE name = "traceview_late"');
+}

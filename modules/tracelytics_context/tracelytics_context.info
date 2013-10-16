@@ -1,6 +1,0 @@
-name = Tracelytics Context
-description = Provide integration for tracking Contexts in AppNeta TraceView (formerly Tracelytics).
-core = 6.x
-package = TraceView (Tracelytics)
-dependencies[] = tracelytics
-dependencies[] = context

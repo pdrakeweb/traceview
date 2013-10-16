@@ -1,6 +1,0 @@
-name = Tracelytics Services
-description = Provide integration for tracking Services in AppNeta TraceView (formerly Tracelytics).
-core = 6.x
-package = TraceView (Tracelytics)
-dependencies[] = tracelytics
-dependencies[] = services

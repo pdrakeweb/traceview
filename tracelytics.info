@@ -1,4 +1,0 @@
-name = Tracelytics
-description = Provide additional integration between Drupal and AppNeta TraceView (formerly Tracelytics) web application monitoring.
-core = 6.x
-package = TraceView (Tracelytics)

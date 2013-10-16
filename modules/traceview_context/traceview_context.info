@@ -1,0 +1,6 @@
+name = TraceView Context
+description = Provide integration for tracking Contexts in AppNeta TraceView.
+core = 6.x
+package = TraceView (TraceView)
+dependencies[] = traceview
+dependencies[] = context

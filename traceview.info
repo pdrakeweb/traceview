@@ -1,0 +1,4 @@
+name = TraceView
+description = Provide additional integration between Drupal and AppNeta TraceView web application monitoring.
+core = 6.x
+package = TraceView (TraceView)
