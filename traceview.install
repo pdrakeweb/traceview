@@ -12,7 +12,7 @@
 function traceview_install() {
   // Attempt to copy variable values from variables belonging to the tracelytics
   // module.
-  $traceview_vars = array(
+  $tracelytics_vars = array(
     'tracelytics_partition_traffic' => 'traceview_partition_traffic',
     'tracelytics_track_menu' => 'traceview_track_menu',
     'tracelytics_log_errors' => 'traceview_log_errors',
