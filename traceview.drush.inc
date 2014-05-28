@@ -5,6 +5,8 @@
  * Implements drush hooks for the traceview module.
  */
 
+include_once 'traceview.inc';
+
 /**
  * Implements hook_drush_exit().
  *
