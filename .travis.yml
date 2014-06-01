@@ -4,12 +4,14 @@ php:
   - 5.4
   - 5.5
 before_script:
-  - composer global require squizlabs/php_codesniffer=1.5.3
+  - composer global require squizlabs/php_codesniffer=1.5.*
   - composer global require drupal/coder:\>7
   - composer global require pdepend/pdepend=1.1.1
-  - composer global require phpmd/phpmd=1.5
+  - composer global require phpmd/phpmd=1.5.*
+  - composer global require sebastian/phpcpd=1.4.*
 script:
   - PATH=~/.composer/vendor/bin/:$PATH
   - find ./ \( -iname \*.module -o -iname \*.inc -o -iname \*.install -o -iname \*.test -o -iname \*.engine \) -exec php -l '{}' \;
-  - phpcs --standard=/home/travis/.composer/vendor/drupal/coder/coder_sniffer/Drupal/ ./ --extensions=module,info,inc,php,install,engine,test,profile
+  - phpcs  ./ --standard=/home/travis/.composer/vendor/drupal/coder/coder_sniffer/Drupal/ --extensions=module,info,inc,php,install,engine,test,profile
   - phpmd ./ text codesize --suffixes module,info,inc,php,install,engine,test,profile
+  - phpcpd --names *.module,*.inc,*.php,*.install,*.engine,*.test ./
