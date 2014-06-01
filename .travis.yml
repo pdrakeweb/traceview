@@ -24,7 +24,7 @@ install:
   - composer global require pdepend/pdepend=1.1.1
   - composer global require phpmd/phpmd=1.5.*
   - composer global require sebastian/phpcpd=1.4.*
-  - if test -f composer.json; then composer install
+  - if test -f composer.json; then composer install; fi
 script:
   - find ./ \( -iname \*.module -o -iname \*.inc -o -iname \*.install -o -iname \*.test -o -iname \*.engine \) -exec php -l '{}' \;
   - phpcs  ./ --standard=/home/travis/.composer/vendor/drupal/coder/coder_sniffer/Drupal/ --extensions=module,info,inc,php,install,engine,test,profile
