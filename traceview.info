@@ -1,5 +1,0 @@
-name = TraceView
-description = Provide additional integration between Drupal and AppNeta TraceView web application monitoring.
-core = 7.x
-package = TraceView
-configure = admin/config/system/traceview

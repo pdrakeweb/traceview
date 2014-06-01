@@ -1,5 +1,0 @@
-name = TraceView Layers (Early)
-description = Provide early-hook integration for tracking core and contrib modules as layers in AppNeta TraceView.
-core = 7.x
-package = TraceView
-dependencies[] = traceview

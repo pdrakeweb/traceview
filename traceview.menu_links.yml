@@ -1,0 +1,6 @@
+traceview.settings:
+  title: TraceView
+  route_name: traceview.settings
+  parent: system.admin_config_system
+  description: 'Configure the settings used for traceview (oboe).'
+  weight: -20

@@ -1,0 +1,9 @@
+name: 'TraceView Layers (Late)'
+type: module
+description: 'Provide late-hook integration for tracking core and contrib modules as layers in AppNeta TraceView.'
+package: TraceView
+version: VERSION
+core: 8.x
+dependencies:
+  - traceview
+  - traceview_early

@@ -1,0 +1,7 @@
+traceview.settings:
+  path: '/admin/config/system/traceview'
+  defaults:
+    _form: '\Drupal\traceview\Form\SettingsForm'
+    _title: 'TraceView settings'
+  requirements:
+    _permission: 'administer traceview'

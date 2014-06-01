@@ -13,13 +13,14 @@ include_once 'traceview.inc';
  * Record traceview traffic partitioning and controller within drush.
  */
 function traceview_drush_exit() {
+  $config = \Drupal::config('traceview.settings');
   // Partition drush commands.
-  if (variable_get('traceview_partition_drush_traffic', FALSE)) {
+  if ($config->get('drush.command', FALSE)) {
     traceview_set_partition('Drush');
   }
 
   // Track drush comamnds.
-  if (variable_get('traceview_track_drush_commands', FALSE)) {
+  if ($config->get('drush.partition', FALSE)) {
     $command = drush_get_command();
     $drush_controller = array(
       'Controller' => $command['command'],

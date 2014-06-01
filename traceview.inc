@@ -17,77 +17,6 @@ define('TRACEVIEW_LATEST_CONFIRMED_VERSION', '1.4.5');
 define('TRACEVIEW_BAD_VERSIONS', serialize(array('1.4.2', '1.4.4')));
 
 /**
- * Sets the Partition, Controller and Action trace attributes.
- */
-function traceview_set_attributes() {
-  global $user;
-
-  // Partition traffic.
-  if (variable_get('traceview_partition_traffic', FALSE)) {
-    $traceview_partition = traceview_set_partition();
-    if (!empty($traceview_partition)) {
-      traceview_oboe_log(NULL, 'info', array('Partition' => $traceview_partition));
-    }
-    else {
-      switch ($user->uid) {
-        case 1:
-          traceview_oboe_log(NULL, 'info', array('Partition' => 'Admin'));
-          break;
-
-        case 0:
-          traceview_oboe_log(NULL, 'info', array('Partition' => 'Anonymous'));
-          break;
-
-        default:
-          traceview_oboe_log(NULL, 'info', array('Partition' => 'Authenticated'));
-          break;
-      }
-    }
-  }
-
-  // Track active menu item.
-  if (variable_get('traceview_track_menu', FALSE)) {
-    // Report the menu entry if we can determine the proper one.
-    if (function_exists('menu_get_item')  && $router_item = menu_get_item()) {
-      $controller = array(
-          'Controller' => $router_item['page_callback'],
-          'Action' => (isset($router_item['page_arguments'][0]) ? traceview_get_action($router_item['page_arguments'][0]) : 'NULL'),
-      );
-    }
-    // Else, report if the page is retrieved from cache.
-    elseif (drupal_page_get_cache(TRUE)) {
-      $controller = array(
-          'Controller' => 'drupal_page_cache',
-          'Action' => 'NULL',
-      );
-    }
-    // Otherwise, report the bootstrap phase reached.
-    else {
-      $phase_names = array(
-          DRUPAL_BOOTSTRAP_CONFIGURATION => "configuration",
-          DRUPAL_BOOTSTRAP_PAGE_CACHE => "page_cache",
-          DRUPAL_BOOTSTRAP_DATABASE => "database",
-          DRUPAL_BOOTSTRAP_VARIABLES => "variables",
-          DRUPAL_BOOTSTRAP_SESSION => "session",
-          DRUPAL_BOOTSTRAP_PAGE_HEADER => "page_header",
-          DRUPAL_BOOTSTRAP_LANGUAGE => "language",
-          DRUPAL_BOOTSTRAP_FULL => "full",
-      );
-      $controller = array(
-          'Controller' => 'drupal_bootstrap',
-          'Action' => $phase_names[drupal_get_bootstrap_phase()],
-      );
-    }
-    traceview_set_controller($controller);
-  }
-
-  $controller = traceview_set_controller(NULL, FALSE, TRUE);
-  if (!empty($controller)) {
-    traceview_oboe_log(NULL, 'info', $controller);
-  }
-}
-
-/**
  * Set the controller to be reported to traceview.
  *
  * @param array $controller
@@ -110,51 +39,6 @@ function traceview_set_controller($controller = NULL, $override = FALSE, $alter 
     drupal_alter('traceview_controller', $traceview_controller);
   }
   return $traceview_controller;
-}
-
-/**
- * Get an action string from an unknown argument type.
- *
- * @param mixed $argument
- *   Argument variable as passed to menu callback.
- *
- * @return string
- *   Description (or string conversion) of $argument.
- */
-function traceview_get_action($argument) {
-  switch (gettype($argument)) {
-    case 'integer':
-    case 'double':
-    case 'boolean':
-    case 'string':
-      $action = (string) $argument;
-      break;
-
-    case 'array':
-      $action = 'array';
-      break;
-
-    case 'object':
-      if (!empty($argument->nid)) {
-        $action = (!empty($argument->type) ? $argument->type . '_' : '') . 'node';
-      }
-      elseif (!empty($argument->uid)) {
-        $action = 'user';
-      }
-      else {
-        $action = get_class($argument);
-      }
-      break;
-
-    case 'resource':
-      $action = get_resource_type($argument);
-      break;
-
-    default:
-      $action = NULL;
-      break;
-  }
-  return $action;
 }
 
 /**
@@ -249,13 +133,14 @@ function traceview_oboe_log($layer, $label, $info = NULL, $backtrace = NULL, $ed
  */
 function traceview_add_annotation($message, $params = array()) {
   $url = 'https://api.tv.appneta.com/api-v1/log_message';
+  $config = \Drupal::config('traceview.settings');
 
   $default_params = array(
-      'key' => variable_get('traceview_key', FALSE),
+      'key' => $config->get('api.key', FALSE),
       'time' => REQUEST_TIME,
-      'appname' => variable_get('traceview_annotation_appname', FALSE),
+      'appname' => $config->get('api.annotations.appname', FALSE),
       'hostname' => gethostname(),
-      'username' => variable_get('traceview_annotation_username', variable_get('site_name', 'Drupal')),
+      'username' => $config->get('api.annotations.username', \Drupal::config('system.site')->get('name', 'Drupal')),
       'layer' => 'PHP',
   );
 
@@ -285,58 +170,6 @@ function traceview_add_annotation($message, $params = array()) {
 }
 
 /**
- * Wrap calls to drupal_http_request, permitting layer creation and full-stack application tracing.
- *
- * Minimum Drupal version is 7.22: http://drupal.org/drupal-7.22-release-notes
- *
- * @param $url
- *   A string containing a fully qualified URI.
- * @param array $options
- *   (optional) An array with options as per drupal_http_request().
- */
-function traceview_drupal_http_request($url, array $options = array()) {
-  global $conf;
-
-  // Parse the URL for information about the query being made.
-  $uri = parse_url($url);
-
-  // Collect information about non-standard ports
-  $remote_host = $uri['host'];
-  $remote_host .= isset($uri['port']) && $uri['port'] != 80 ? ':' . $uri['port'] : '';
-
-  // Collect fragments and querystrings
-  $service_arg = $uri['path'];
-  $service_arg .= isset($uri['fragment']) ? $uri['fragment'] : '';
-  $service_arg .= isset($uri['query']) ? $uri['query'] : '';
-
-  // Start the drupal_http_request layer (with a backtrace).
-  traceview_oboe_log('drupal_http_request', 'entry', array(
-  'IsService' => 'True',
-  'RemoteProtocol' => $uri['scheme'],
-  'RemoteController' => 'drupal_http_request',
-  'RemoteHost' => $remote_host,
-  'ServiceArg' => $service_arg,
-  ), TRUE);
-
-  // Set an X-Trace header.
-  $options['headers']['X-Trace'] = oboe_get_context();
-
-  // Allow drupal_http_request to temporarily bypass the override.
-  unset($conf['drupal_http_request_function']);
-
-  // Call drupal_http_request.
-  $response = drupal_http_request($url, $options);
-
-  // Put the override back in place.
-  $conf['drupal_http_request_function'] = 'traceview_drupal_http_request';
-
-  // Stop the drupal_http_request layer.
-  traceview_oboe_log('drupal_http_request', 'exit', array('ResponseCode' => $response->code));
-
-  return $response;
-}
-
-/**
  * In order to support configurations where the php-oboe extension may or may
  * not be available during a given application execution, such as during the
  * execution of a drush command, on a singler server in a cluster or on a non-
@@ -349,6 +182,7 @@ if (!isset($conf['traceview_fail_silently']) || $conf['traceview_fail_silently']
   if (!function_exists('oboe_log')) {
     // These functions intentionally left empty.
     function oboe_log() {}
+    function oboe_is_tracing() {}
     function oboe_get_context() {}
     function oboe_get_rum_header() {}
     function oboe_get_rum_footer() {}

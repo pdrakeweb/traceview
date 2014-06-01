@@ -1,0 +1,24 @@
+controller:
+  track: false
+partition:
+  track: false
+rum:
+  track: false
+watchdog:
+  track: false
+  404: false
+  403: false
+hooks:
+  track: false
+  profile:
+    views: false
+    panels: false
+api:
+  key: ''
+  annotations:
+    appname: ''
+    username: ''
+    modules: false
+drush:
+  command: false
+  partition: false

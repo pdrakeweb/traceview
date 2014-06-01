@@ -1,0 +1,9 @@
+services:
+  event_dispatcher:
+    class: Drupal\traceview\EventDispatcher\TraceViewContainerAwareEventDispatcher
+    arguments: ['@service_container']
+
+  traceview.partition:
+    class: Drupal\traceview\EventSubscriber\Partition
+    tags:
+      - { name: event_subscriber }

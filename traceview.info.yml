@@ -1,0 +1,7 @@
+name: TraceView
+type: module
+description: 'Provide additional integration between Drupal and AppNeta TraceView web application monitoring.'
+package: TraceView
+version: VERSION
+core: 8.x
+configure: traceview.settings
