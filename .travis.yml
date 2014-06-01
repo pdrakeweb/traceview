@@ -1,0 +1,20 @@
+language: php
+php:
+  - 5.3
+  - 5.4
+  - 5.5
+before_install:
+  - export DRUPAL_INFO_VER=`grep core traceview.info | cut -d ' ' -f3 | cut -b1`
+  - export DRUPAL_MAJOR_VER=`if test -f info.yml; then echo '8'; elif [[ "$DRUPAL_INFO_VER" ]]; then echo $DRUPAL_INFO_VER; else echo '7'; fi`
+install:
+  - composer global require squizlabs/php_codesniffer=1.5.*
+  - composer global require drupal/coder:\>$DRUPAL_MAJOR_VER
+  - composer global require pdepend/pdepend=1.1.1
+  - composer global require phpmd/phpmd=1.5.*
+  - composer global require sebastian/phpcpd=1.4.*
+script:
+  - PATH=~/.composer/vendor/bin/:$PATH
+  - find ./ \( -iname \*.module -o -iname \*.inc -o -iname \*.install -o -iname \*.test -o -iname \*.engine \) -exec php -l '{}' \;
+  - phpcs  ./ --standard=/home/travis/.composer/vendor/drupal/coder/coder_sniffer/Drupal/ --extensions=module,info,inc,php,install,engine,test,profile
+  - phpmd ./ text codesize --suffixes module,info,inc,php,install,engine,test,profile
+  - phpcpd --names *.module,*.inc,*.php,*.install,*.engine,*.test ./
