@@ -14,4 +14,4 @@ before_install:
 install:
   - composer global require pdrakeweb/drupal-module-lint:7.*@dev
 script:
-  - dmlint
+  - $HOME/.composer/vendor/bin/dmlint
