@@ -3,11 +3,8 @@ branches:
     - master
     - /^8\.x.*/
     - /^7\.x.*/
-    - /^6\.x.*/
 language: php
 php:
-  - 5.3
-  - 5.4
   - 5.5
 before_install:
   - composer self-update
