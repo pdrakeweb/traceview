@@ -1,0 +1,14 @@
+branches:
+  only:
+    - master
+    - /^8\.x.*/
+    - /^7\.x.*/
+language: php
+php:
+  - 5.4
+before_install:
+  - composer self-update
+install:
+  - composer global require pdrakeweb/drupal-module-lint:7.*@dev -vvv
+script:
+  - $HOME/.composer/vendor/bin/dmlint
