@@ -9,6 +9,6 @@ php:
 before_install:
   - composer self-update
 install:
-  - composer global require pdrakeweb/drupal-module-lint:7.*@dev
+  - composer global require pdrakeweb/drupal-module-lint:7.*@dev -vvv
 script:
   - $HOME/.composer/vendor/bin/dmlint
